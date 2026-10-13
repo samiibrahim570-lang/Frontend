@@ -1,0 +1,144 @@
+<div class="page-header">
+  <div>
+    <h1>Vouchers (Debit / Credit)</h1>
+    <p class="text-muted mb-0">Receipts, payments and journal adjustments.</p>
+  </div>
+  <div class="flex gap-8">
+    <input type="text" placeholder="Search voucher no…" style="width:220px;" (change)="search($any($event.target).value)" />
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export</button>
+    @if (auth.canCreate('VOUCHER')) {
+      <button class="btn btn-primary" (click)="openCreate()">+ New Voucher</button>
+    }
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>New Voucher</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Voucher Date *</label>
+          <input type="date" formControlName="voucherDate" />
+        </div>
+        <div class="form-group">
+          <label>Party Type *</label>
+          <select formControlName="partyType">
+            <option value="Customer">Customer</option>
+            <option value="Supplier">Supplier</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Voucher Type *</label>
+          <select formControlName="voucherType">
+            <option value="Receipt">Receipt (money in)</option>
+            <option value="Payment">Payment (money out)</option>
+            <option value="JournalDebit">Journal Debit</option>
+            <option value="JournalCredit">Journal Credit</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        @if (form.value.partyType === 'Customer') {
+          <div class="form-group">
+            <label>Customer *</label>
+            <select formControlName="customerId">
+              <option [ngValue]="null" disabled>Select customer</option>
+              @for (c of customers(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }} ({{ c.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        @if (form.value.partyType === 'Supplier') {
+          <div class="form-group">
+            <label>Supplier *</label>
+            <select formControlName="supplierId">
+              <option [ngValue]="null" disabled>Select supplier</option>
+              @for (s of suppliers(); track s.id) {
+                <option [ngValue]="s.id">{{ s.name }} ({{ s.code }})</option>
+              }
+            </select>
+          </div>
+        }
+        <div class="form-group">
+          <label>Amount *</label>
+          <input type="number" formControlName="amount" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Payment Mode</label>
+          <select formControlName="paymentMode">
+            <option value="Cash">Cash</option>
+            <option value="Bank">Bank</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Online">Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Reference No</label>
+          <input type="text" formControlName="referenceNo" placeholder="Cheque / Bank ref" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Narration</label>
+        <input type="text" formControlName="narration" placeholder="Optional note" />
+      </div>
+
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Voucher' }}</button>
+        <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="table-wrap" style="margin-top:16px;">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else if (vouchers().length === 0) {
+    <div class="empty-state">No vouchers yet.</div>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Voucher No</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Party</th>
+          <th class="text-right">Amount</th>
+          <th>Mode</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of vouchers(); track v.id) {
+          <tr>
+            <td>{{ v.voucherNo }}</td>
+            <td>{{ v.voucherDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ v.voucherType }}</td>
+            <td>{{ v.partyName || v.partyType }}</td>
+            <td class="text-right">{{ v.amount | number: '1.0-2' }}</td>
+            <td>{{ v.paymentMode }}</td>
+            <td>
+              @if (v.status === 'Cancelled') {
+                <span class="badge badge-danger">Cancelled</span>
+              } @else {
+                <span class="badge badge-success">Confirmed</span>
+              }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" (click)="printVoucher(v)">Print</button>
+              @if (v.status !== 'Cancelled' && auth.canDelete('VOUCHER')) {
+                <button class="btn btn-danger btn-sm" (click)="cancelVoucher(v)">Cancel</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

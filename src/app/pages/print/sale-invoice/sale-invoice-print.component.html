@@ -1,0 +1,99 @@
+<div class="print-toolbar no-print">
+  <button class="btn btn-outline btn-sm" (click)="close()">Close</button>
+  <button class="btn btn-primary btn-sm" (click)="print()">
+    <app-icon name="print" [size]="14"></app-icon>
+    Print
+  </button>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="padding:32px;">Loading invoice…</p>
+} @else {
+  @if (invoice(); as inv) {
+  <div class="print-page">
+    <div class="print-header">
+      <div class="print-company">
+        <div class="mark">FF</div>
+        <div>
+          <h2>Fish Feed Mill</h2>
+          <p>Production &amp; Trading of Fish Feed</p>
+          <p>Phone: 0300-0000000 &nbsp;|&nbsp; Address: Industrial Area, City</p>
+        </div>
+      </div>
+      <div class="print-doc-title">
+        <h1>SALE INVOICE</h1>
+        <div class="doc-no">{{ inv.invoiceNo }}</div>
+        <div class="doc-date">{{ inv.invoiceDate | date: 'dd MMM, yyyy' }}</div>
+        @if (inv.status === 'Cancelled') {
+          <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+        }
+      </div>
+    </div>
+
+    <div class="print-meta-grid">
+      <div class="print-meta-box">
+        <div class="meta-label">Bill To</div>
+        <div class="meta-name">{{ inv.customerName }}</div>
+        <div class="meta-line">Customer ID: {{ inv.customerId }}</div>
+      </div>
+      <div class="print-meta-box">
+        <div class="meta-label">Delivery Details</div>
+        <div class="meta-line">Booker: {{ inv.bookerName || '—' }}</div>
+        <div class="meta-line">Driver: {{ inv.driverName || '—' }}</div>
+        <div class="meta-line">Vehicle No: {{ inv.vehicleNumber || '—' }}</div>
+      </div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th style="width:32px;">#</th>
+          <th>Item</th>
+          <th class="text-right" style="width:90px;">Qty</th>
+          <th class="text-right" style="width:90px;">Rate</th>
+          <th class="text-right" style="width:90px;">Discount</th>
+          <th class="text-right" style="width:100px;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of inv.items; track line.itemId; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ line.itemName }}</td>
+            <td class="text-right">{{ line.quantity | number: '1.0-2' }} {{ line.unitOfMeasure }}</td>
+            <td class="text-right">{{ line.rate | number: '1.0-2' }}</td>
+            <td class="text-right">{{ line.discountAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ line.totalAmount | number: '1.0-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (inv.remarks) {
+      <p style="font-size:12px;"><strong>Remarks:</strong> {{ inv.remarks }}</p>
+    }
+
+    <div class="print-summary">
+      <div class="row"><span>Items Total</span><span>{{ inv.totalAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>Discount</span><span>-{{ inv.discountAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>Tax</span><span>+{{ inv.taxAmount | number: '1.0-2' }}</span></div>
+      <div class="row total"><span>Net Amount</span><span>{{ inv.netAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>Paid</span><span>{{ inv.paidAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>Balance Due</span><span>{{ inv.balanceAmount | number: '1.0-2' }}</span></div>
+    </div>
+
+    <div class="print-footer">
+      <div class="print-signature">
+        <div class="line"></div>
+        <div class="label">Prepared By</div>
+      </div>
+      <div class="print-signature">
+        <div class="line"></div>
+        <div class="label">Customer Signature</div>
+      </div>
+    </div>
+
+    <p class="print-note">This is a system-generated invoice. Goods once sold cannot be returned unless agreed in advance.</p>
+  </div>
+}
+}

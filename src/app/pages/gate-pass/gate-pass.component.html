@@ -1,0 +1,207 @@
+<div class="page-header">
+  <div>
+    <h1>Gate Pass</h1>
+    <p class="text-muted mb-0">Consolidate multiple invoices carried on one vehicle/trip.</p>
+  </div>
+  <div class="flex gap-8">
+    @if (auth.canCreate('GATEPASS')) {
+      <button class="btn btn-primary" (click)="openCreate()">+ New Gate Pass</button>
+    }
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>New Gate Pass</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Gate Pass No <span class="text-muted">(blank = auto)</span></label>
+          <input type="text" formControlName="gatePassNo" placeholder="Auto-generated if blank" />
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" formControlName="gatePassDate" />
+        </div>
+        <div class="form-group">
+          <label>Type *</label>
+          <select formControlName="gatePassType">
+            <option value="Sale">Sale (Outward)</option>
+            <option value="Purchase">Purchase (Inward)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Booker <span class="text-muted">(shared for this trip)</span></label>
+          <select formControlName="bookerId">
+            <option [ngValue]="null">— none —</option>
+            @for (b of bookers(); track b.id) {
+              <option [ngValue]="b.id">{{ b.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Driver Name</label>
+          <input type="text" formControlName="driverName" />
+        </div>
+        <div class="form-group">
+          <label>Vehicle Number</label>
+          <input type="text" formControlName="vehicleNumber" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Remarks</label>
+        <input type="text" formControlName="remarks" />
+      </div>
+
+      <h3 style="margin-top:18px;">Select Invoices <span class="text-muted">({{ selectedInvoiceIds.size }} selected)</span></h3>
+      <div class="table-wrap" style="max-height: 320px; overflow-y: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"></th>
+              <th>Invoice No</th>
+              <th>Date</th>
+              <th>Party</th>
+              <th class="text-right">Net Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (form.value.gatePassType === 'Sale') {
+              @for (s of availableSales(); track s.id) {
+                <tr (click)="toggleInvoice(s.id)" style="cursor:pointer;" [style.background]="isSelected(s.id) ? 'rgba(31,95,91,0.06)' : ''">
+                  <td><input type="checkbox" [checked]="isSelected(s.id)" (click)="$event.stopPropagation(); toggleInvoice(s.id)" /></td>
+                  <td>{{ s.invoiceNo }}</td>
+                  <td>{{ s.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+                  <td>{{ s.customerName }}</td>
+                  <td class="text-right">{{ s.netAmount | number: '1.0-2' }}</td>
+                </tr>
+              }
+            } @else {
+              @for (p of availablePurchases(); track p.id) {
+                <tr (click)="toggleInvoice(p.id)" style="cursor:pointer;" [style.background]="isSelected(p.id) ? 'rgba(31,95,91,0.06)' : ''">
+                  <td><input type="checkbox" [checked]="isSelected(p.id)" (click)="$event.stopPropagation(); toggleInvoice(p.id)" /></td>
+                  <td>{{ p.invoiceNo }}</td>
+                  <td>{{ p.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+                  <td>{{ p.supplierName }}</td>
+                  <td class="text-right">{{ p.netAmount | number: '1.0-2' }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex gap-8" style="margin-top:16px;">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Gate Pass' }}</button>
+        <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (viewing(); as g) {
+  <div class="card">
+    <div class="page-header" style="margin-bottom:12px;">
+      <div>
+        <h2>Gate Pass {{ g.gatePassNo }}</h2>
+        <p class="text-muted mb-0">
+          {{ g.gatePassDate | date: 'dd-MMM-yyyy' }} · {{ g.gatePassType }} ·
+          Booker: {{ g.bookerName || '—' }} · Driver: {{ g.driverName || '—' }} · Vehicle: {{ g.vehicleNumber || '—' }}
+        </p>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-outline" (click)="print()">Print</button>
+        @if (g.status !== 'Cancelled' && auth.canDelete('GATEPASS')) {
+          <button class="btn btn-danger" (click)="cancelGatePass(g)">Cancel</button>
+        }
+        <button class="btn btn-outline" (click)="closeView()">Close</button>
+      </div>
+    </div>
+
+    <div class="stat-grid" style="margin-bottom:16px;">
+      <div class="stat-card"><div class="stat-label">Total Invoices</div><div class="stat-value">{{ g.totalInvoices }}</div></div>
+      <div class="stat-card"><div class="stat-label">Grand Total Qty</div><div class="stat-value">{{ g.grandTotalQuantity | number: '1.0-2' }}</div></div>
+      <div class="stat-card"><div class="stat-label">Grand Total Amount</div><div class="stat-value">{{ g.grandTotalAmount | number: '1.0-2' }}</div></div>
+    </div>
+
+    @for (inv of g.invoices; track inv.invoiceId) {
+      <div class="card" style="margin-bottom:12px;">
+        <div class="flex justify-between items-center" style="margin-bottom:8px;">
+          <strong>{{ inv.invoiceNo }} — {{ inv.partyName }}</strong>
+          <span class="text-muted">{{ inv.invoiceDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Discount</th><th class="text-right">Total</th></tr>
+            </thead>
+            <tbody>
+              @for (it of inv.items; track it.itemId) {
+                <tr>
+                  <td>{{ it.itemName }}</td>
+                  <td class="text-right">{{ it.quantity | number: '1.0-2' }} {{ it.unitOfMeasure }}</td>
+                  <td class="text-right">{{ it.rate | number: '1.0-2' }}</td>
+                  <td class="text-right">{{ it.discountAmount | number: '1.0-2' }}</td>
+                  <td class="text-right">{{ it.totalAmount | number: '1.0-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="text-right" style="margin-top:8px;"><strong>Invoice Total: {{ inv.netAmount | number: '1.0-2' }}</strong></p>
+      </div>
+    }
+  </div>
+}
+
+@if (!showForm() && !viewing()) {
+  <div class="table-wrap" style="margin-top:16px;">
+    @if (loading()) {
+      <p class="text-muted" style="padding:16px;">Loading…</p>
+    } @else if (gatePasses().length === 0) {
+      <div class="empty-state">No gate passes yet.</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Gate Pass No</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Driver / Vehicle</th>
+            <th class="text-right">Invoices</th>
+            <th class="text-right">Total Amount</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (g of gatePasses(); track g.id) {
+            <tr>
+              <td>{{ g.gatePassNo }}</td>
+              <td>{{ g.gatePassDate | date: 'dd-MMM-yyyy' }}</td>
+              <td>{{ g.gatePassType }}</td>
+              <td>{{ g.driverName || '—' }} / {{ g.vehicleNumber || '—' }}</td>
+              <td class="text-right">{{ g.totalInvoices }}</td>
+              <td class="text-right">{{ g.grandTotalAmount | number: '1.0-2' }}</td>
+              <td>
+                @if (g.status === 'Cancelled') { <span class="badge badge-danger">Cancelled</span> }
+                @else { <span class="badge badge-success">Confirmed</span> }
+              </td>
+              <td class="text-right">
+                <button class="btn btn-outline btn-sm" (click)="view(g)">View</button>
+                @if (auth.canPrint('GATEPASS')) {
+                  <button class="btn btn-outline btn-sm" (click)="printFromList(g)">Print</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}

@@ -1,0 +1,170 @@
+<div class="page-header">
+  <div>
+    <h1>Sale</h1>
+    <p class="text-muted mb-0">Create sale invoices and manage sales.</p>
+  </div>
+  @if (auth.canCreate('SALE')) {
+    <button class="btn btn-primary" (click)="openCreate()">+ New Sale</button>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>New Sale Invoice</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Invoice No (leave blank to auto-generate)</label>
+          <input type="text" formControlName="invoiceNo" placeholder="Auto" />
+        </div>
+        <div class="form-group"><label>Invoice Date *</label><input type="date" formControlName="invoiceDate" /></div>
+        <div class="form-group">
+          <label>Customer *</label>
+          <select formControlName="customerId">
+            <option [ngValue]="null" disabled>Select customer</option>
+            @for (c of customers(); track c.id) { <option [ngValue]="c.id">{{ c.name }} ({{ c.code }})</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Booker</label>
+          <select formControlName="bookerId">
+            <option [ngValue]="null">— None —</option>
+            @for (b of bookers(); track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group"><label>Driver Name</label><input type="text" formControlName="driverName" /></div>
+        <div class="form-group"><label>Vehicle Number</label><input type="text" formControlName="vehicleNumber" /></div>
+      </div>
+
+      <h3 style="margin-top:18px;">Items</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Item</th><th style="width:110px;">Qty</th><th style="width:110px;">Rate</th><th style="width:110px;">Discount</th><th class="text-right" style="width:110px;">Total</th><th style="width:50px;"></th></tr>
+          </thead>
+          <tbody formArrayName="items">
+            @for (row of itemRows.controls; track $index; let i = $index) {
+              <tr [formGroupName]="i">
+                <td>
+                  <select formControlName="itemId">
+                    <option [ngValue]="null" disabled>Select item</option>
+                    @for (it of items(); track it.id) { <option [ngValue]="it.id">{{ it.itemName }} ({{ it.unitOfMeasure }})</option> }
+                  </select>
+                </td>
+                <td><input type="number" formControlName="quantity" step="0.01" /></td>
+                <td><input type="number" formControlName="rate" step="0.01" /></td>
+                <td><input type="number" formControlName="discountAmount" step="0.01" /></td>
+                <td class="text-right">{{ lineTotal(i) | number: '1.0-2' }}</td>
+                <td class="text-right"><button type="button" class="btn btn-danger btn-sm" (click)="removeItemRow(i)">✕</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px;" (click)="addItemRow()">+ Add Item</button>
+
+      <div class="form-row" style="margin-top:18px;">
+        <div class="form-group"><label>Discount</label><input type="number" formControlName="discountAmount" step="0.01" /></div>
+        <div class="form-group"><label>Tax</label><input type="number" formControlName="taxAmount" step="0.01" /></div>
+        <div class="form-group"><label>Paid Amount</label><input type="number" formControlName="paidAmount" step="0.01" /></div>
+        <div class="form-group"><label>Remarks</label><input type="text" formControlName="remarks" /></div>
+      </div>
+
+      <div class="card" style="background: var(--color-bg); border-style: dashed;">
+        <div class="flex justify-between"><span>Items Subtotal</span><strong>{{ itemsSubTotal() | number: '1.0-2' }}</strong></div>
+        <div class="flex justify-between"><span>Net Amount</span><strong>{{ netAmount() | number: '1.0-2' }}</strong></div>
+        <div class="flex justify-between"><span>Balance Due</span><strong [style.color]="balanceAmount() > 0 ? 'var(--color-danger)' : 'var(--color-success)'">{{ balanceAmount() | number: '1.0-2' }}</strong></div>
+      </div>
+
+      <div class="flex gap-8" style="margin-top:16px;">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Invoice' }}</button>
+        <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (viewing(); as s) {
+  <div class="card">
+    <div class="page-header">
+      <div>
+        <h3>Invoice {{ s.invoiceNo }}</h3>
+        <p class="text-muted mb-0">{{ s.customerName }} · {{ s.invoiceDate | date: 'dd-MMM-yyyy' }}</p>
+      </div>
+      <div class="flex gap-8">
+        @if (auth.canPrint('SALE')) {
+          <button class="btn btn-outline btn-sm" (click)="printInvoice(s)">🖨 Print Invoice</button>
+        }
+        @if (auth.canDelete('SALE') && s.status !== 'Cancelled') {
+          <button class="btn btn-danger btn-sm" (click)="cancelSale(s)">Cancel Invoice</button>
+        }
+        <button class="btn btn-outline btn-sm" (click)="closeView()">Close</button>
+      </div>
+    </div>
+    <p class="text-muted">Driver: {{ s.driverName || '—' }} · Vehicle: {{ s.vehicleNumber || '—' }} · Booker: {{ s.bookerName || '—' }}</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Discount</th><th class="text-right">Total</th></tr></thead>
+        <tbody>
+          @for (line of s.items; track line.itemId) {
+            <tr>
+              <td>{{ line.itemName }}</td>
+              <td class="text-right">{{ line.quantity }} {{ line.unitOfMeasure }}</td>
+              <td class="text-right">{{ line.rate | number: '1.0-2' }}</td>
+              <td class="text-right">{{ line.discountAmount | number: '1.0-2' }}</td>
+              <td class="text-right">{{ line.totalAmount | number: '1.0-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px; max-width:280px; margin-left:auto;">
+      <div class="flex justify-between"><span class="text-muted">Net Amount</span><strong>{{ s.netAmount | number: '1.0-2' }}</strong></div>
+      <div class="flex justify-between"><span class="text-muted">Paid</span><strong>{{ s.paidAmount | number: '1.0-2' }}</strong></div>
+      <div class="flex justify-between"><span class="text-muted">Balance</span><strong>{{ s.balanceAmount | number: '1.0-2' }}</strong></div>
+    </div>
+  </div>
+}
+
+<div class="page-header" style="margin-top:20px;">
+  <input type="text" placeholder="Search invoice no / customer…" style="max-width:280px;" (change)="search($any($event.target).value)" />
+  <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+</div>
+
+<div class="table-wrap">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else if (sales().length === 0) {
+    <div class="empty-state">No sale invoices yet.</div>
+  } @else {
+    <table>
+      <thead>
+        <tr><th>Invoice No</th><th>Date</th><th>Customer</th><th class="text-right">Net Amount</th><th class="text-right">Balance</th><th>Status</th><th class="text-right">Actions</th></tr>
+      </thead>
+      <tbody>
+        @for (s of sales(); track s.id) {
+          <tr>
+            <td>{{ s.invoiceNo }}</td>
+            <td>{{ s.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ s.customerName }}</td>
+            <td class="text-right">{{ s.netAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ s.balanceAmount | number: '1.0-2' }}</td>
+            <td>
+              @if (s.status === 'Cancelled') { <span class="badge badge-danger">Cancelled</span> }
+              @else { <span class="badge badge-success">Confirmed</span> }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" (click)="view(s)">View</button>
+              @if (auth.canPrint('SALE')) {
+                <button class="btn btn-outline btn-sm" (click)="printInvoice(s)">Print</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,0 +1,79 @@
+<div class="print-toolbar no-print">
+  <button class="btn btn-outline btn-sm" (click)="close()">Close</button>
+  <button class="btn btn-primary btn-sm" (click)="print()">
+    <app-icon name="print" [size]="14"></app-icon>
+    Print
+  </button>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="padding:32px;">Loading statement…</p>
+} @else {
+  @if (report(); as r) {
+  <div class="print-page">
+    <div class="print-header">
+      <div class="print-company">
+        <div class="mark">FF</div>
+        <div>
+          <h2>Fish Feed Mill</h2>
+          <p>{{ partyType() === 'customer' ? 'Customer' : 'Supplier' }} Account Statement</p>
+        </div>
+      </div>
+      <div class="print-doc-title">
+        <h1>LEDGER STATEMENT</h1>
+        @if (fromDate || toDate) {
+          <div class="doc-date">{{ fromDate || 'Start' }} to {{ toDate || 'Today' }}</div>
+        } @else {
+          <div class="doc-date">Complete History</div>
+        }
+      </div>
+    </div>
+
+    <div class="print-meta-grid" style="grid-template-columns: 1fr;">
+      <div class="print-meta-box">
+        <div class="meta-label">{{ partyType() === 'customer' ? 'Customer' : 'Supplier' }}</div>
+        <div class="meta-name">{{ r.partyName }}</div>
+      </div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Ref No</th>
+          <th>Narration</th>
+          <th class="text-right">Debit</th>
+          <th class="text-right">Credit</th>
+          <th class="text-right">Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#fafaf7;">
+          <td colspan="6"><strong>Opening Balance</strong></td>
+          <td class="text-right"><strong>{{ r.openingBalance | number: '1.0-2' }}</strong></td>
+        </tr>
+        @for (e of r.entries; track $index) {
+          <tr>
+            <td>{{ e.transactionDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ e.sourceType }}</td>
+            <td>{{ e.refNo || '—' }}</td>
+            <td>{{ e.narration || '—' }}</td>
+            <td class="text-right">{{ e.debit ? (e.debit | number: '1.0-2') : '' }}</td>
+            <td class="text-right">{{ e.credit ? (e.credit | number: '1.0-2') : '' }}</td>
+            <td class="text-right">{{ e.runningBalance | number: '1.0-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="print-summary">
+      <div class="row"><span>Total Debit</span><span>{{ r.totalDebit | number: '1.0-2' }}</span></div>
+      <div class="row"><span>Total Credit</span><span>{{ r.totalCredit | number: '1.0-2' }}</span></div>
+      <div class="row total"><span>Closing Balance</span><span>{{ r.closingBalance | number: '1.0-2' }}</span></div>
+    </div>
+
+    <p class="print-note">Generated on {{ today() }}. All figures in local currency.</p>
+  </div>
+}
+}

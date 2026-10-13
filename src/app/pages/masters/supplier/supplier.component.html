@@ -1,0 +1,66 @@
+<div class="page-header">
+  <div>
+    <h1>Suppliers</h1>
+    <p class="text-muted mb-0">Manage supplier accounts and opening balances.</p>
+  </div>
+  <div class="flex gap-8">
+    @if (auth.canCreate('SUPPLIER')) {
+      <button class="btn btn-primary" (click)="openCreate()">+ New Supplier</button>
+    }
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export</button>
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>{{ editingId() ? 'Edit Supplier' : 'New Supplier' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group"><label>Code *</label><input type="text" formControlName="code" /></div>
+        <div class="form-group"><label>Name *</label><input type="text" formControlName="name" /></div>
+        <div class="form-group"><label>Contact Person</label><input type="text" formControlName="contactPerson" /></div>
+        <div class="form-group"><label>Phone</label><input type="tel" formControlName="phone" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Address</label><input type="text" formControlName="address" /></div>
+        <div class="form-group"><label>City</label><input type="text" formControlName="city" /></div>
+        <div class="form-group"><label>Opening Balance</label><input type="number" formControlName="openingBalance" step="0.01" /></div>
+      </div>
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="table-wrap" style="margin-top: 16px;">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else if (suppliers().length === 0) {
+    <div class="empty-state">No suppliers yet.</div>
+  } @else {
+    <table>
+      <thead>
+        <tr><th>Code</th><th>Name</th><th>Phone</th><th>City</th><th class="text-right">Balance</th><th class="text-right">Actions</th></tr>
+      </thead>
+      <tbody>
+        @for (s of suppliers(); track s.id) {
+          <tr>
+            <td>{{ s.code }}</td>
+            <td>{{ s.name }}</td>
+            <td class="text-muted">{{ s.phone || '—' }}</td>
+            <td class="text-muted">{{ s.city || '—' }}</td>
+            <td class="text-right" [style.color]="s.currentBalance > 0 ? 'var(--color-warning)' : 'var(--color-success)'">
+              {{ s.currentBalance | number: '1.0-2' }}
+            </td>
+            <td class="text-right">
+              @if (auth.canEdit('SUPPLIER')) { <button class="btn btn-outline btn-sm" (click)="openEdit(s)">Edit</button> }
+              @if (auth.canDelete('SUPPLIER')) { <button class="btn btn-danger btn-sm" (click)="remove(s)">Delete</button> }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

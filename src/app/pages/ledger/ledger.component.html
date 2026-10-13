@@ -1,0 +1,112 @@
+<div class="page-header">
+  <div>
+    <h1>Ledger</h1>
+    <p class="text-muted mb-0">Customer &amp; Supplier statements with running balance.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="flex gap-12" style="margin-bottom:16px;">
+    <button class="btn" [class.btn-primary]="partyType === 'Customer'" [class.btn-outline]="partyType !== 'Customer'" (click)="switchType('Customer')">Customer Ledger</button>
+    <button class="btn" [class.btn-primary]="partyType === 'Supplier'" [class.btn-outline]="partyType !== 'Supplier'" (click)="switchType('Supplier')">Supplier Ledger</button>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>{{ partyType }}</label>
+      <select [(ngModel)]="selectedPartyId">
+        <option [ngValue]="null" disabled>Select {{ partyType.toLowerCase() }}</option>
+        @if (partyType === 'Customer') {
+          @for (c of customers(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }} ({{ c.code }})</option>
+          }
+        } @else {
+          @for (s of suppliers(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }} ({{ s.code }})</option>
+          }
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label>From</label>
+      <input type="date" [(ngModel)]="fromDate" />
+    </div>
+    <div class="form-group">
+      <label>To</label>
+      <input type="date" [(ngModel)]="toDate" />
+    </div>
+    <div class="form-group" style="justify-content: flex-end;">
+      <button class="btn btn-primary" (click)="view()" [disabled]="!selectedPartyId">View Statement</button>
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="margin-top:16px;">Loading…</p>
+}
+
+@if (report(); as r) {
+  <div class="card" style="margin-top:16px;">
+    <div class="page-header" style="margin-bottom:12px;">
+      <div>
+        <h2>{{ r.partyName }}</h2>
+        <p class="text-muted mb-0">Opening Balance: {{ r.openingBalance | number: '1.0-2' }} | Closing Balance: <strong>{{ r.closingBalance | number: '1.0-2' }}</strong></p>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-outline" (click)="exportExcel()">⬇ Export</button>
+        <button class="btn btn-outline" (click)="print()">🖨 Print</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Ref No</th>
+            <th>Narration</th>
+            <th class="text-right">Debit</th>
+            <th class="text-right">Credit</th>
+            <th class="text-right">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of r.entries; track $index) {
+            <tr>
+              <td>{{ e.transactionDate | date: 'dd-MMM-yyyy' }}</td>
+              <td>{{ e.sourceType }}</td>
+              <td>{{ e.refNo || '—' }}</td>
+              <td class="text-muted">{{ e.narration || '—' }}</td>
+              <td class="text-right">{{ e.debit ? (e.debit | number: '1.0-2') : '' }}</td>
+              <td class="text-right">{{ e.credit ? (e.credit | number: '1.0-2') : '' }}</td>
+              <td class="text-right"><strong>{{ e.runningBalance | number: '1.0-2' }}</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+} @else if (!loading()) {
+  <div class="card" style="margin-top:16px;">
+    <h3>Balances Overview</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Code</th><th>Name</th><th class="text-right">Opening</th><th class="text-right">Current Balance</th></tr>
+        </thead>
+        <tbody>
+          @if (partyType === 'Customer') {
+            @for (b of customerBalances(); track b.partyId) {
+              <tr><td>{{ b.code }}</td><td>{{ b.name }}</td><td class="text-right">{{ b.openingBalance | number: '1.0-2' }}</td><td class="text-right">{{ b.currentBalance | number: '1.0-2' }}</td></tr>
+            }
+          } @else {
+            @for (b of supplierBalances(); track b.partyId) {
+              <tr><td>{{ b.code }}</td><td>{{ b.name }}</td><td class="text-right">{{ b.openingBalance | number: '1.0-2' }}</td><td class="text-right">{{ b.currentBalance | number: '1.0-2' }}</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

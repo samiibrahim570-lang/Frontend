@@ -1,0 +1,99 @@
+<div class="page-header">
+  <div>
+    <h1>Roles &amp; Permissions</h1>
+    <p class="text-muted mb-0">Manage roles and their View/Create/Edit/Delete/Print access per module.</p>
+  </div>
+  <button class="btn btn-primary" (click)="openCreate()">+ New Role</button>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>{{ editingId() ? 'Edit Role' : 'New Role' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Role Name *</label>
+          <input type="text" formControlName="roleName" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" formControlName="description" />
+        </div>
+      </div>
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="flex gap-12" style="align-items:flex-start; margin-top:16px;">
+  <div class="table-wrap" style="flex: 0 0 280px;">
+    @if (loading()) {
+      <p class="text-muted" style="padding:16px;">Loading…</p>
+    } @else {
+      <table>
+        <thead><tr><th>Role</th><th></th></tr></thead>
+        <tbody>
+          @for (r of roles(); track r.id) {
+            <tr [style.background]="selectedRole()?.id === r.id ? 'rgba(31,95,91,0.06)' : ''">
+              <td style="cursor:pointer;" (click)="selectRole(r)">
+                <div>{{ r.roleName }}</div>
+                @if (r.description) { <div class="text-muted" style="font-size:12px;">{{ r.description }}</div> }
+              </td>
+              <td class="text-right">
+                <button class="btn btn-outline btn-sm" (click)="openEdit(r)">Edit</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <div class="card" style="flex:1; min-width: 0;">
+    @if (!selectedRole()) {
+      <div class="empty-state">Select a role on the left to manage its menu permissions.</div>
+    } @else {
+      <div class="page-header" style="margin-bottom:12px;">
+        <h3>Permissions — {{ selectedRole()!.roleName }}</h3>
+        <button class="btn btn-primary" (click)="savePermissions()" [disabled]="savingPermissions()">
+          {{ savingPermissions() ? 'Saving…' : 'Save Permissions' }}
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th class="text-center">View</th>
+              <th class="text-center">Create</th>
+              <th class="text-center">Edit</th>
+              <th class="text-center">Delete</th>
+              <th class="text-center">Print</th>
+              <th class="text-center">All</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of permissionRows(); track row.menuId) {
+              <tr>
+                <td>{{ row.menuName }}</td>
+                <td class="text-center"><input type="checkbox" [(ngModel)]="row.canView" [ngModelOptions]="{standalone: true}" /></td>
+                <td class="text-center"><input type="checkbox" [(ngModel)]="row.canCreate" [ngModelOptions]="{standalone: true}" /></td>
+                <td class="text-center"><input type="checkbox" [(ngModel)]="row.canEdit" [ngModelOptions]="{standalone: true}" /></td>
+                <td class="text-center"><input type="checkbox" [(ngModel)]="row.canDelete" [ngModelOptions]="{standalone: true}" /></td>
+                <td class="text-center"><input type="checkbox" [(ngModel)]="row.canPrint" [ngModelOptions]="{standalone: true}" /></td>
+                <td class="text-center">
+                  <button class="btn btn-outline btn-sm" (click)="toggleAll(row, true)">All</button>
+                  <button class="btn btn-outline btn-sm" (click)="toggleAll(row, false)">None</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

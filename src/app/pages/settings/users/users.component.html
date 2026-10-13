@@ -1,0 +1,91 @@
+<div class="page-header">
+  <div>
+    <h1>User Management</h1>
+    <p class="text-muted mb-0">Create staff accounts and assign roles.</p>
+  </div>
+  <button class="btn btn-primary" (click)="openCreate()">+ New User</button>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>{{ editingId() ? 'Edit User' : 'New User' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" formControlName="fullName" />
+        </div>
+        <div class="form-group">
+          <label>Username *</label>
+          <input type="text" formControlName="userName" />
+        </div>
+        <div class="form-group">
+          <label>Role *</label>
+          <select formControlName="roleId">
+            <option [ngValue]="null" disabled>Select role</option>
+            @for (r of roles(); track r.id) {
+              <option [ngValue]="r.id">{{ r.roleName }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" formControlName="phone" />
+        </div>
+        @if (!editingId()) {
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" formControlName="password" />
+          </div>
+        }
+        @if (editingId()) {
+          <div class="form-group">
+            <label class="flex items-center gap-8" style="margin-top:8px;">
+              <input type="checkbox" formControlName="isActive" style="width:auto;" /> Active
+            </label>
+          </div>
+        }
+      </div>
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="table-wrap" style="margin-top:16px;">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else {
+    <table>
+      <thead>
+        <tr><th>Full Name</th><th>Username</th><th>Role</th><th>Email</th><th>Status</th><th class="text-right">Actions</th></tr>
+      </thead>
+      <tbody>
+        @for (u of users(); track u.id) {
+          <tr>
+            <td>{{ u.fullName }}</td>
+            <td>{{ u.userName }}</td>
+            <td>{{ u.roleName }}</td>
+            <td class="text-muted">{{ u.email || '—' }}</td>
+            <td>
+              @if (u.isActive) { <span class="badge badge-success">Active</span> }
+              @else { <span class="badge badge-danger">Inactive</span> }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" (click)="openEdit(u)">Edit</button>
+              <button class="btn btn-danger btn-sm" (click)="remove(u)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

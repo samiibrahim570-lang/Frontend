@@ -1,0 +1,124 @@
+<div class="login-page">
+  <!-- Brand panel -->
+  <aside class="login-visual" aria-hidden="false">
+    <div class="visual-grid"></div>
+    <div class="visual-shape shape-1"></div>
+    <div class="visual-shape shape-2"></div>
+
+    <div class="visual-content">
+      <div class="brand">
+        <div class="brand-mark">FF</div>
+        <div class="brand-text">
+          <span class="brand-name">Fish Feed Mill</span>
+          <span class="brand-tag">Management Suite</span>
+        </div>
+      </div>
+
+      <div class="visual-copy">
+        <h1>Run your entire mill<br />from one clear dashboard.</h1>
+        <p>Sale · Purchase · Production · Accounts — all in one place.</p>
+      </div>
+
+      <ul class="feature-list">
+        <li class="feature-item">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span>Sale &amp; Purchase invoicing with live stock</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span>Production / Pisai raw material tracking</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span>Customer &amp; Supplier ledgers, always up to date</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span>Role-based access for every team member</span>
+        </li>
+      </ul>
+
+      <p class="visual-footer">Secure sign-in · Your data stays on your server</p>
+    </div>
+  </aside>
+
+  <!-- Form side -->
+  <main class="login-form-side">
+    <div class="login-card">
+      <div class="mobile-brand">
+        <div class="brand-mark">FF</div>
+        <span class="brand-name">Fish Feed Mill</span>
+      </div>
+
+      <header class="card-header">
+        <h2>Welcome back</h2>
+        <p class="subtitle">Sign in to continue to your dashboard.</p>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label for="userName">Username</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            <input
+              id="userName"
+              type="text"
+              formControlName="userName"
+              placeholder="Enter your username"
+              autocomplete="username"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap password-field">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-visibility"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword"
+            >
+              @if (showPassword) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          @if (loading) {
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Signing in…</span>
+          } @else {
+            <span>Sign In</span>
+            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          }
+        </button>
+      </form>
+
+      <p class="hint">Default: <strong>admin</strong> / <strong>Admin&#64;123</strong></p>
+    </div>
+
+    <p class="footer">© Fish Feed Mill · All rights reserved</p>
+  </main>
+</div>

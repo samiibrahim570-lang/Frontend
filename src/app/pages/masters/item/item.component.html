@@ -1,0 +1,126 @@
+<div class="page-header">
+  <div>
+    <h1>Items</h1>
+    <p class="text-muted mb-0">Raw materials and finished goods with live stock.</p>
+  </div>
+  <div class="flex gap-8">
+    @if (auth.canCreate('ITEM')) {
+      <button class="btn btn-primary" (click)="openCreate()">+ New Item</button>
+    }
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export</button>
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>{{ editingId() ? 'Edit Item' : 'New Item' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Item Code *</label>
+          <input type="text" formControlName="itemCode" placeholder="e.g. RM-001" />
+        </div>
+        <div class="form-group">
+          <label>Item Name *</label>
+          <input type="text" formControlName="itemName" placeholder="e.g. Soybean Meal" />
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select formControlName="categoryId">
+            <option [ngValue]="null" disabled>Select category</option>
+            @for (c of categories(); track c.id) {
+              <option [ngValue]="c.id">{{ c.categoryName }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unit of Measure *</label>
+          <select formControlName="unitOfMeasure">
+            <option value="Kg">Kg</option>
+            <option value="Bag">Bag</option>
+            <option value="Ton">Ton</option>
+            <option value="Piece">Piece</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Opening Stock</label>
+          <input type="number" formControlName="openingStock" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Purchase Price</label>
+          <input type="number" formControlName="purchasePrice" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Sale Price</label>
+          <input type="number" formControlName="salePrice" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Reorder Level</label>
+          <input type="number" formControlName="reorderLevel" step="0.01" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="flex items-center gap-8"><input type="checkbox" formControlName="isRawMaterial" style="width:auto;" /> Raw Material (used in Production)</label>
+        <label class="flex items-center gap-8"><input type="checkbox" formControlName="isFinishedGood" style="width:auto;" /> Finished Good (sold / produced)</label>
+      </div>
+
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="table-wrap" style="margin-top: 16px;">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else if (items().length === 0) {
+    <div class="empty-state">No items yet. Create your first one.</div>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>UOM</th>
+          <th>Type</th>
+          <th class="text-right">Stock</th>
+          <th class="text-right">Sale Price</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of items(); track i.id) {
+          <tr>
+            <td>{{ i.itemCode }}</td>
+            <td>{{ i.itemName }}</td>
+            <td class="text-muted">{{ i.categoryName }}</td>
+            <td>{{ i.unitOfMeasure }}</td>
+            <td>
+              @if (i.isRawMaterial) { <span class="badge badge-warning">Raw</span> }
+              @if (i.isFinishedGood) { <span class="badge badge-success">Finished</span> }
+            </td>
+            <td class="text-right" [style.color]="i.currentStock <= i.reorderLevel ? 'var(--color-danger)' : ''">
+              {{ i.currentStock | number: '1.0-2' }}
+            </td>
+            <td class="text-right">{{ i.salePrice | number: '1.0-2' }}</td>
+            <td class="text-right">
+              @if (auth.canEdit('ITEM')) {
+                <button class="btn btn-outline btn-sm" (click)="openEdit(i)">Edit</button>
+              }
+              @if (auth.canDelete('ITEM')) {
+                <button class="btn btn-danger btn-sm" (click)="remove(i)">Delete</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

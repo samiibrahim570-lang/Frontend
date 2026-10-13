@@ -1,0 +1,76 @@
+<div class="print-toolbar no-print">
+  <button class="btn btn-outline btn-sm" (click)="close()">Close</button>
+  <button class="btn btn-primary btn-sm" (click)="print()">
+    <app-icon name="print" [size]="14"></app-icon>
+    Print
+  </button>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="padding:32px;">Loading production record…</p>
+} @else {
+  @if (record(); as p) {
+    <div class="print-page">
+      <div class="print-header">
+        <div class="print-company">
+          <div class="mark">FF</div>
+          <div>
+            <h2>Fish Feed Mill</h2>
+            <p>Production / Pisai Slip</p>
+          </div>
+        </div>
+        <div class="print-doc-title">
+          <h1>PRODUCTION SLIP</h1>
+          <div class="doc-no">{{ p.productionNo }}</div>
+          <div class="doc-date">{{ p.productionDate | date: 'dd MMM, yyyy' }}</div>
+          @if (p.status === 'Cancelled') {
+            <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+          }
+        </div>
+      </div>
+
+      <table class="print-table">
+        <thead><tr><th colspan="4">Raw Materials Consumed</th></tr><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Amount</th></tr></thead>
+        <tbody>
+          @for (r of p.rawMaterials; track r.itemId) {
+            <tr>
+              <td>{{ r.itemName }}</td>
+              <td class="text-right">{{ r.quantity | number: '1.0-2' }}</td>
+              <td class="text-right">{{ r.rate | number: '1.0-2' }}</td>
+              <td class="text-right">{{ r.amount | number: '1.0-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <table class="print-table">
+        <thead><tr><th colspan="4">Finished Goods Produced</th></tr><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Amount</th></tr></thead>
+        <tbody>
+          @for (o of p.outputs; track o.itemId) {
+            <tr>
+              <td>{{ o.itemName }}</td>
+              <td class="text-right">{{ o.quantity | number: '1.0-2' }}</td>
+              <td class="text-right">{{ o.rate | number: '1.0-2' }}</td>
+              <td class="text-right">{{ o.amount | number: '1.0-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (p.remarks) {
+        <p style="font-size:12px;"><strong>Remarks:</strong> {{ p.remarks }}</p>
+      }
+
+      <div class="print-summary">
+        <div class="row"><span>Total Raw Material Qty</span><span>{{ p.totalRawMaterialQty | number: '1.0-2' }}</span></div>
+        <div class="row"><span>Total Output Qty</span><span>{{ p.totalOutputQty | number: '1.0-2' }}</span></div>
+        <div class="row total"><span>Wastage</span><span>{{ p.wastageQty | number: '1.0-2' }}</span></div>
+      </div>
+
+      <div class="print-footer">
+        <div class="print-signature"><div class="line"></div><div class="label">Supervisor</div></div>
+        <div class="print-signature"><div class="line"></div><div class="label">Store Keeper</div></div>
+      </div>
+    </div>
+  }
+}

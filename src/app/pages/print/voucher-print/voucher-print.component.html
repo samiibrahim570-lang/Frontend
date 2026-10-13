@@ -1,0 +1,52 @@
+<div class="print-toolbar no-print">
+  <button class="btn btn-outline btn-sm" (click)="close()">Close</button>
+  <button class="btn btn-primary btn-sm" (click)="print()">
+    <app-icon name="print" [size]="14"></app-icon>
+    Print
+  </button>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="padding:32px;">Loading voucher…</p>
+} @else {
+  @if (voucher(); as v) {
+    <div class="print-page" style="max-width: 560px;">
+      <div class="print-header">
+        <div class="print-company">
+          <div class="mark">FF</div>
+          <div>
+            <h2>Fish Feed Mill</h2>
+            <p>{{ v.voucherType === 'Receipt' ? 'Cash/Bank Receipt' : v.voucherType === 'Payment' ? 'Payment Voucher' : 'Journal Voucher' }}</p>
+          </div>
+        </div>
+        <div class="print-doc-title">
+          <h1>{{ v.voucherType === 'Receipt' ? 'RECEIPT' : v.voucherType === 'Payment' ? 'PAYMENT' : 'JOURNAL' }}</h1>
+          <div class="doc-no">{{ v.voucherNo }}</div>
+          <div class="doc-date">{{ v.voucherDate | date: 'dd MMM, yyyy' }}</div>
+          @if (v.status === 'Cancelled') {
+            <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+          }
+        </div>
+      </div>
+
+      <div class="print-meta-box" style="margin-bottom:20px;">
+        <div class="meta-label">{{ v.partyType }}</div>
+        <div class="meta-name">{{ v.partyName || '—' }}</div>
+        <div class="meta-line">Payment Mode: {{ v.paymentMode }}</div>
+        @if (v.referenceNo) { <div class="meta-line">Reference No: {{ v.referenceNo }}</div> }
+        @if (v.narration) { <div class="meta-line">Narration: {{ v.narration }}</div> }
+      </div>
+
+      <div class="print-summary" style="width: 100%;">
+        <div class="row total"><span>Amount</span><span>{{ v.amount | number: '1.0-2' }}</span></div>
+      </div>
+
+      <div class="print-footer">
+        <div class="print-signature"><div class="line"></div><div class="label">Received/Paid By</div></div>
+        <div class="print-signature"><div class="line"></div><div class="label">Authorized Signature</div></div>
+      </div>
+    </div>
+  } @else {
+    <p style="padding:32px;">Voucher not found.</p>
+  }
+}

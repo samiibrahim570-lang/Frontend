@@ -1,0 +1,67 @@
+<div class="welcome-banner">
+  <div>
+    <p class="eyebrow">{{ todayDate() }}</p>
+    <h1>{{ greeting() }}, {{ auth.currentUser?.fullName }} 👋</h1>
+    <p class="text-muted mb-0">Here's what's happening at the mill today.</p>
+  </div>
+  <div class="welcome-icon"><app-icon name="dashboard" [size]="34"></app-icon></div>
+</div>
+
+@if (loading()) {
+  <p class="text-muted">Loading…</p>
+} @else {
+  @if (summary(); as s) {
+    <div class="stat-grid">
+      <div class="stat-card accent-primary">
+        <div class="stat-icon"><app-icon name="sale" [size]="20"></app-icon></div>
+        <div class="stat-label">Today's Sales</div>
+        <div class="stat-value">{{ s.todaySales | number: '1.0-2' }}</div>
+      </div>
+      <div class="stat-card accent-accent">
+        <div class="stat-icon"><app-icon name="purchase" [size]="20"></app-icon></div>
+        <div class="stat-label">Today's Purchases</div>
+        <div class="stat-value">{{ s.todayPurchases | number: '1.0-2' }}</div>
+      </div>
+      <div class="stat-card accent-success">
+        <div class="stat-icon"><app-icon name="ledger" [size]="20"></app-icon></div>
+        <div class="stat-label">Total Receivable</div>
+        <div class="stat-value">{{ s.totalReceivable | number: '1.0-2' }}</div>
+      </div>
+      <div class="stat-card accent-danger">
+        <div class="stat-icon"><app-icon name="voucher" [size]="20"></app-icon></div>
+        <div class="stat-label">Total Payable</div>
+        <div class="stat-value">{{ s.totalPayable | number: '1.0-2' }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><app-icon name="customer" [size]="20"></app-icon></div>
+        <div class="stat-label">Customers</div>
+        <div class="stat-value">{{ s.totalCustomers }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><app-icon name="supplier" [size]="20"></app-icon></div>
+        <div class="stat-label">Suppliers</div>
+        <div class="stat-value">{{ s.totalSuppliers }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><app-icon name="item" [size]="20"></app-icon></div>
+        <div class="stat-label">Items</div>
+        <div class="stat-value">{{ s.totalItems }}</div>
+      </div>
+      <div class="stat-card" [class.accent-danger]="s.lowStockItemsCount > 0">
+        <div class="stat-icon"><app-icon name="stockledger" [size]="20"></app-icon></div>
+        <div class="stat-label">Low Stock Items</div>
+        <div class="stat-value" [style.color]="s.lowStockItemsCount > 0 ? 'var(--color-danger)' : ''">
+          {{ s.lowStockItemsCount }}
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-links">
+      <a routerLink="/sale" class="quick-link"><app-icon name="sale" [size]="18"></app-icon> New Sale</a>
+      <a routerLink="/purchase" class="quick-link"><app-icon name="purchase" [size]="18"></app-icon> New Purchase</a>
+      <a routerLink="/production" class="quick-link"><app-icon name="production" [size]="18"></app-icon> New Production</a>
+      <a routerLink="/gate-pass" class="quick-link"><app-icon name="gatepass" [size]="18"></app-icon> New Gate Pass</a>
+      <a routerLink="/reports" class="quick-link"><app-icon name="reports" [size]="18"></app-icon> View Reports</a>
+    </div>
+  }
+}

@@ -1,0 +1,91 @@
+<div class="print-toolbar no-print">
+  <button class="btn btn-outline btn-sm" (click)="close()">Close</button>
+  <button class="btn btn-primary btn-sm" (click)="print()">
+    <app-icon name="print" [size]="14"></app-icon>
+    Print
+  </button>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="padding:32px;">Loading gate pass…</p>
+} @else {
+  @if (gatePass(); as g) {
+  <div class="print-page">
+    <div class="print-header">
+      <div class="print-company">
+        <div class="mark">FF</div>
+        <div>
+          <h2>Fish Feed Mill</h2>
+          <p>Gate Pass Slip</p>
+        </div>
+      </div>
+      <div class="print-doc-title">
+        <h1>GATE PASS</h1>
+        <div class="doc-no">{{ g.gatePassNo }}</div>
+        <div class="doc-date">{{ g.gatePassDate | date: 'dd MMM, yyyy' }}</div>
+        @if (g.status === 'Cancelled') {
+          <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+        }
+      </div>
+    </div>
+
+    <div class="print-meta-grid">
+      <div class="print-meta-box">
+        <div class="meta-label">Trip Details</div>
+        <div class="meta-line"><strong>Type:</strong> {{ g.gatePassType }} ({{ g.gatePassType === 'Sale' ? 'Outward' : 'Inward' }})</div>
+        <div class="meta-line"><strong>Booker:</strong> {{ g.bookerName || '—' }}</div>
+      </div>
+      <div class="print-meta-box">
+        <div class="meta-label">Vehicle</div>
+        <div class="meta-line"><strong>Driver:</strong> {{ g.driverName || '—' }}</div>
+        <div class="meta-line"><strong>Vehicle No:</strong> {{ g.vehicleNumber || '—' }}</div>
+      </div>
+    </div>
+
+    @for (inv of g.invoices; track inv.invoiceId; let idx = $index) {
+      <div style="margin-bottom:16px; border:1px solid var(--color-border); border-radius:6px; overflow:hidden;">
+        <div style="background:var(--color-bg); padding:8px 12px; display:flex; justify-content:space-between; font-size:12.5px;">
+          <strong>{{ idx + 1 }}. {{ inv.invoiceNo }} — {{ inv.partyName }}</strong>
+          <span>{{ inv.invoiceDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+        <table class="print-table" style="margin-bottom:0;">
+          <thead>
+            <tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Discount</th><th class="text-right">Amount</th></tr>
+          </thead>
+          <tbody>
+            @for (it of inv.items; track it.itemId) {
+              <tr>
+                <td>{{ it.itemName }}</td>
+                <td class="text-right">{{ it.quantity | number: '1.0-2' }} {{ it.unitOfMeasure }}</td>
+                <td class="text-right">{{ it.rate | number: '1.0-2' }}</td>
+                <td class="text-right">{{ it.discountAmount | number: '1.0-2' }}</td>
+                <td class="text-right">{{ it.totalAmount | number: '1.0-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div style="padding:6px 12px; text-align:right; font-size:12.5px; background:#fafaf7;">
+          <strong>Invoice Total: {{ inv.netAmount | number: '1.0-2' }}</strong>
+        </div>
+      </div>
+    }
+
+    <div class="print-summary">
+      <div class="row"><span>Total Invoices</span><span>{{ g.totalInvoices }}</span></div>
+      <div class="row"><span>Total Quantity</span><span>{{ g.grandTotalQuantity | number: '1.0-2' }}</span></div>
+      <div class="row total"><span>Grand Total</span><span>{{ g.grandTotalAmount | number: '1.0-2' }}</span></div>
+    </div>
+
+    <div class="print-footer">
+      <div class="print-signature">
+        <div class="line"></div>
+        <div class="label">Gate Security</div>
+      </div>
+      <div class="print-signature">
+        <div class="line"></div>
+        <div class="label">Driver Signature</div>
+      </div>
+    </div>
+  </div>
+}
+}

@@ -1,0 +1,90 @@
+<div class="page-header">
+  <div>
+    <h1>Item Stock Ledger</h1>
+    <p class="text-muted mb-0">Purchase (IN) → Production consumption (OUT) → Production output (IN) → Sale (OUT), in order.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="form-row">
+    <div class="form-group">
+      <label>Item</label>
+      <select [(ngModel)]="selectedItemId">
+        <option [ngValue]="null" disabled>Select item</option>
+        @for (i of items(); track i.id) {
+          <option [ngValue]="i.id">{{ i.itemName }} ({{ i.itemCode }})</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label>From</label>
+      <input type="date" [(ngModel)]="fromDate" />
+    </div>
+    <div class="form-group">
+      <label>To</label>
+      <input type="date" [(ngModel)]="toDate" />
+    </div>
+    <div class="form-group" style="justify-content: flex-end;">
+      <button class="btn btn-primary" (click)="view()" [disabled]="!selectedItemId">View Ledger</button>
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="margin-top:16px;">Loading…</p>
+}
+
+@if (report(); as r) {
+  <div class="card" style="margin-top:16px;">
+    <div class="page-header" style="margin-bottom:12px;">
+      <div>
+        <h2>{{ r.itemName }} <span class="text-muted">({{ r.itemCode }})</span></h2>
+        <p class="text-muted mb-0">
+          Opening: {{ r.openingStock | number: '1.0-2' }} {{ r.unitOfMeasure }} |
+          Total IN: {{ r.totalIn | number: '1.0-2' }} |
+          Total OUT: {{ r.totalOut | number: '1.0-2' }} |
+          Closing: <strong>{{ r.closingStock | number: '1.0-2' }} {{ r.unitOfMeasure }}</strong>
+        </p>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-outline" (click)="exportExcel()">⬇ Export</button>
+        <button class="btn btn-outline" (click)="print()">🖨 Print</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Movement</th>
+            <th>Ref No</th>
+            <th>Narration</th>
+            <th class="text-right">In</th>
+            <th class="text-right">Out</th>
+            <th class="text-right">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of r.entries; track $index) {
+            <tr>
+              <td>{{ e.transactionDate | date: 'dd-MMM-yyyy' }}</td>
+              <td>
+                @if (e.sourceType === 'Purchase') { <span class="badge badge-success">Purchase</span> }
+                @else if (e.sourceType === 'Sale') { <span class="badge badge-danger">Sale</span> }
+                @else if (e.sourceType === 'ProductionRawMaterial') { <span class="badge badge-warning">Pisai (Consumed)</span> }
+                @else if (e.sourceType === 'ProductionOutput') { <span class="badge badge-success">Pisai (Produced)</span> }
+                @else { <span class="badge badge-muted">{{ e.sourceType }}</span> }
+              </td>
+              <td>{{ e.refNo || '—' }}</td>
+              <td class="text-muted">{{ e.narration || '—' }}</td>
+              <td class="text-right">{{ e.inQty ? (e.inQty | number: '1.0-2') : '' }}</td>
+              <td class="text-right">{{ e.outQty ? (e.outQty | number: '1.0-2') : '' }}</td>
+              <td class="text-right"><strong>{{ e.runningBalance | number: '1.0-2' }}</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

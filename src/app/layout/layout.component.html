@@ -1,0 +1,70 @@
+<div class="shell" [class.mobile-open]="mobileOpen">
+  <div class="sidebar-backdrop" (click)="closeMobile()"></div>
+
+  <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+    <div class="sidebar-brand">
+      <div class="brand-mark">FF</div>
+      @if (sidebarOpen) {
+        <div class="brand-text">
+          <div class="brand-title">Fish Feed Mill</div>
+          <div class="brand-sub">Business Suite</div>
+        </div>
+      }
+    </div>
+
+    <nav class="nav-scroll">
+      @for (group of groupedMenus(); track group.label) {
+        <div class="nav-group">
+          @if (sidebarOpen) {
+            <div class="nav-group-label">{{ group.label }}</div>
+          }
+          @for (menu of group.menus; track menu.menuId) {
+            <a
+              [routerLink]="menu.route"
+              routerLinkActive="active"
+              class="nav-item"
+              [title]="menu.menuName"
+              (click)="closeMobile()"
+            >
+              <app-icon [name]="menu.icon" [size]="18"></app-icon>
+              @if (sidebarOpen) {
+                <span>{{ menu.menuName }}</span>
+              }
+            </a>
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="collapse-btn" (click)="toggleSidebar()" [title]="sidebarOpen ? 'Collapse' : 'Expand'">
+        <app-icon [name]="sidebarOpen ? 'back' : 'menu'" [size]="16"></app-icon>
+        @if (sidebarOpen) { <span>Collapse</span> }
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn mobile-only" (click)="toggleMobile()" aria-label="Toggle menu">
+        <app-icon name="menu" [size]="20"></app-icon>
+      </button>
+      <div class="spacer"></div>
+      <div class="user-chip">
+        <div class="avatar">{{ authService.currentUser?.fullName?.charAt(0) }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ authService.currentUser?.fullName }}</div>
+          <div class="user-role text-muted">{{ authService.currentUser?.roleName }}</div>
+        </div>
+        <button class="btn btn-outline btn-sm" (click)="logout()">
+          <app-icon name="logout" [size]="14"></app-icon>
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

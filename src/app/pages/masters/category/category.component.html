@@ -1,0 +1,68 @@
+<div class="page-header">
+  <div>
+    <h1>Categories</h1>
+    <p class="text-muted mb-0">Group your items into categories.</p>
+  </div>
+  <div class="flex gap-8">
+    @if (auth.canCreate('CATEGORY')) {
+      <button class="btn btn-primary" (click)="openCreate()">+ New Category</button>
+    }
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export</button>
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>{{ editingId() ? 'Edit Category' : 'New Category' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category Name *</label>
+          <input type="text" formControlName="categoryName" placeholder="e.g. Raw Material" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" formControlName="description" placeholder="Optional" />
+        </div>
+      </div>
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="table-wrap" style="margin-top: 16px;">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else if (categories().length === 0) {
+    <div class="empty-state">No categories yet. Create your first one.</div>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of categories(); track c.id) {
+          <tr>
+            <td>{{ c.categoryName }}</td>
+            <td class="text-muted">{{ c.description || '—' }}</td>
+            <td class="text-right">
+              @if (auth.canEdit('CATEGORY')) {
+                <button class="btn btn-outline btn-sm" (click)="openEdit(c)">Edit</button>
+              }
+              @if (auth.canDelete('CATEGORY')) {
+                <button class="btn btn-danger btn-sm" (click)="remove(c)">Delete</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

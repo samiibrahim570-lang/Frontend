@@ -1,0 +1,140 @@
+<div class="page-header">
+  <div>
+    <h1>Reports</h1>
+    <p class="text-muted mb-0">Sale, Purchase, Production and Stock reports.</p>
+  </div>
+  <div class="flex gap-8">
+    <button class="btn btn-outline" (click)="exportCurrentTab()">⬇ Export This Report</button>
+    <button class="btn btn-accent" (click)="exportWholeApplication()" [disabled]="exportingAll()">
+      {{ exportingAll() ? 'Exporting…' : '⬇ Export Whole Application' }}
+    </button>
+    <button class="btn btn-outline" (click)="print()">🖨 Print</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="flex gap-8" style="margin-bottom:16px;">
+    <button class="btn" [class.btn-primary]="activeTab()==='sale'" [class.btn-outline]="activeTab()!=='sale'" (click)="setTab('sale')">Sale</button>
+    <button class="btn" [class.btn-primary]="activeTab()==='purchase'" [class.btn-outline]="activeTab()!=='purchase'" (click)="setTab('purchase')">Purchase</button>
+    <button class="btn" [class.btn-primary]="activeTab()==='production'" [class.btn-outline]="activeTab()!=='production'" (click)="setTab('production')">Production / Pisai</button>
+    <button class="btn" [class.btn-primary]="activeTab()==='stock'" [class.btn-outline]="activeTab()!=='stock'" (click)="setTab('stock')">Stock</button>
+  </div>
+
+  <div class="form-row">
+    @if (activeTab() !== 'stock') {
+      <div class="form-group">
+        <label>From</label>
+        <input type="date" [(ngModel)]="fromDate" />
+      </div>
+      <div class="form-group">
+        <label>To</label>
+        <input type="date" [(ngModel)]="toDate" />
+      </div>
+    } @else {
+      <div class="form-group">
+        <label class="flex items-center gap-8"><input type="checkbox" [(ngModel)]="lowStockOnly" style="width:auto;" /> Low stock only</label>
+      </div>
+    }
+    <div class="form-group" style="justify-content:flex-end;">
+      <button class="btn btn-primary" (click)="run()">Run Report</button>
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="text-muted" style="margin-top:16px;">Loading…</p>
+}
+
+@if (!loading() && activeTab() === 'sale') {
+  <div class="table-wrap" style="margin-top:16px;">
+    <table>
+      <thead><tr><th>Date</th><th>Invoice No</th><th>Customer</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
+      <tbody>
+        @for (r of saleReport(); track r.invoiceNo) {
+          <tr>
+            <td>{{ r.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ r.invoiceNo }}</td>
+            <td>{{ r.customerName }}</td>
+            <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.paidAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="empty-state">No data.</td></tr>
+        }
+      </tbody>
+      @if (saleReport().length > 0) {
+        <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>{{ saleTotal() | number: '1.0-2' }}</strong></td><td></td><td></td></tr></tfoot>
+      }
+    </table>
+  </div>
+}
+
+@if (!loading() && activeTab() === 'purchase') {
+  <div class="table-wrap" style="margin-top:16px;">
+    <table>
+      <thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
+      <tbody>
+        @for (r of purchaseReport(); track r.invoiceNo) {
+          <tr>
+            <td>{{ r.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ r.invoiceNo }}</td>
+            <td>{{ r.supplierName }}</td>
+            <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.paidAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="empty-state">No data.</td></tr>
+        }
+      </tbody>
+      @if (purchaseReport().length > 0) {
+        <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>{{ purchaseTotal() | number: '1.0-2' }}</strong></td><td></td><td></td></tr></tfoot>
+      }
+    </table>
+  </div>
+}
+
+@if (!loading() && activeTab() === 'production') {
+  <div class="table-wrap" style="margin-top:16px;">
+    <table>
+      <thead><tr><th>Date</th><th>Production No</th><th class="text-right">Raw Material Qty</th><th class="text-right">Output Qty</th><th class="text-right">Wastage</th></tr></thead>
+      <tbody>
+        @for (r of productionReport(); track r.productionNo) {
+          <tr>
+            <td>{{ r.productionDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ r.productionNo }}</td>
+            <td class="text-right">{{ r.totalRawMaterialQty | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.totalOutputQty | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.wastageQty | number: '1.0-2' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty-state">No data.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (!loading() && activeTab() === 'stock') {
+  <div class="table-wrap" style="margin-top:16px;">
+    <table>
+      <thead><tr><th>Code</th><th>Item</th><th>Category</th><th>UOM</th><th class="text-right">Opening</th><th class="text-right">Current</th><th class="text-right">Reorder Level</th></tr></thead>
+      <tbody>
+        @for (r of stockReport(); track r.itemCode) {
+          <tr>
+            <td>{{ r.itemCode }}</td>
+            <td>{{ r.itemName }}</td>
+            <td class="text-muted">{{ r.categoryName }}</td>
+            <td>{{ r.unitOfMeasure }}</td>
+            <td class="text-right">{{ r.openingStock | number: '1.0-2' }}</td>
+            <td class="text-right" [style.color]="r.currentStock <= r.reorderLevel ? 'var(--color-danger)' : ''">{{ r.currentStock | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.reorderLevel | number: '1.0-2' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="empty-state">No data.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

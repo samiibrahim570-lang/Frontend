@@ -1,0 +1,173 @@
+<div class="page-header">
+  <div>
+    <h1>Production / Pisai</h1>
+    <p class="text-muted mb-0">Convert raw material into finished goods.</p>
+  </div>
+  @if (auth.canCreate('PRODUCTION')) {
+    <button class="btn btn-primary" (click)="openCreate()">+ New Production</button>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>New Production / Pisai</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group"><label>Production Date *</label><input type="date" formControlName="productionDate" /></div>
+        <div class="form-group"><label>Wastage Qty</label><input type="number" formControlName="wastageQty" step="0.01" /></div>
+        <div class="form-group"><label>Remarks</label><input type="text" formControlName="remarks" /></div>
+      </div>
+
+      <h3 style="margin-top:18px;">Raw Materials (consumed)</h3>
+      @if (rawMaterialItems().length === 0) {
+        <div class="card" style="background: var(--color-warning-bg); border-color: var(--color-warning); padding: 12px 16px; margin-bottom:12px;">
+          <strong style="color: var(--color-warning);">⚠ No "Raw Material" items found.</strong>
+          <p class="mb-0" style="font-size:12.5px; margin-top:4px;">Go to <strong>Items</strong> and tick "Raw Material" on at least one item.</p>
+        </div>
+      }
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th style="width:130px;">Qty</th><th style="width:130px;">Rate</th><th style="width:50px;"></th></tr></thead>
+          <tbody formArrayName="rawMaterials">
+            @for (row of rawRows.controls; track $index; let i = $index) {
+              <tr [formGroupName]="i">
+                <td>
+                  <select formControlName="itemId">
+                    <option [ngValue]="null" disabled>Select raw material</option>
+                    @for (it of rawMaterialItems(); track it.id) { <option [ngValue]="it.id">{{ it.itemName }} ({{ it.unitOfMeasure }}) — stock: {{ it.currentStock }}</option> }
+                  </select>
+                </td>
+                <td><input type="number" formControlName="quantity" step="0.01" /></td>
+                <td><input type="number" formControlName="rate" step="0.01" /></td>
+                <td class="text-right"><button type="button" class="btn btn-danger btn-sm" (click)="removeRawRow(i)">✕</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px;" (click)="addRawRow()">+ Add Raw Material</button>
+      <p class="text-muted" style="margin-top:8px;">Total raw material: <strong>{{ totalRawQty() | number: '1.0-3' }}</strong></p>
+
+      <h3 style="margin-top:18px;">Output (finished goods produced)</h3>
+      @if (finishedGoodItems().length === 0) {
+        <div class="card" style="background: var(--color-warning-bg); border-color: var(--color-warning); padding: 12px 16px; margin-bottom:12px;">
+          <strong style="color: var(--color-warning);">⚠ No "Finished Good" items found.</strong>
+          <p class="mb-0" style="font-size:12.5px; margin-top:4px;">
+            This dropdown will stay empty (and Save will fail) until at least one item has the
+            <strong>"Finished Good"</strong> flag turned on. Go to <strong>Items</strong>, edit your output
+            product (e.g. processed Fish Feed), and tick "Finished Good".
+          </p>
+        </div>
+      }
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th style="width:130px;">Qty</th><th style="width:130px;">Rate</th><th style="width:50px;"></th></tr></thead>
+          <tbody formArrayName="outputs">
+            @for (row of outputRows.controls; track $index; let i = $index) {
+              <tr [formGroupName]="i">
+                <td>
+                  <select formControlName="itemId">
+                    <option [ngValue]="null" disabled>Select finished good</option>
+                    @for (it of finishedGoodItems(); track it.id) { <option [ngValue]="it.id">{{ it.itemName }} ({{ it.unitOfMeasure }})</option> }
+                  </select>
+                </td>
+                <td><input type="number" formControlName="quantity" step="0.01" /></td>
+                <td><input type="number" formControlName="rate" step="0.01" /></td>
+                <td class="text-right"><button type="button" class="btn btn-danger btn-sm" (click)="removeOutputRow(i)">✕</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px;" (click)="addOutputRow()">+ Add Output Item</button>
+      <p class="text-muted" style="margin-top:8px;">Total output: <strong>{{ totalOutputQty() | number: '1.0-3' }}</strong></p>
+
+      <div class="flex gap-8" style="margin-top:16px;">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Production' }}</button>
+        <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (viewing(); as p) {
+  <div class="card">
+    <div class="page-header">
+      <div>
+        <h3>{{ p.productionNo }}</h3>
+        <p class="text-muted mb-0">{{ p.productionDate | date: 'dd-MMM-yyyy' }}</p>
+      </div>
+      <div class="flex gap-8">
+        @if (auth.canPrint('PRODUCTION')) {
+          <button class="btn btn-outline btn-sm" (click)="printProduction(p)">🖨 Print</button>
+        }
+        @if (auth.canDelete('PRODUCTION') && p.status !== 'Cancelled') {
+          <button class="btn btn-danger btn-sm" (click)="cancelProduction(p)">Cancel</button>
+        }
+        <button class="btn btn-outline btn-sm" (click)="closeView()">Close</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="card" style="flex:1;">
+        <h3>Raw Materials</h3>
+        <table>
+          <thead><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Amount</th></tr></thead>
+          <tbody>
+            @for (r of p.rawMaterials; track r.itemId) {
+              <tr><td>{{ r.itemName }}</td><td class="text-right">{{ r.quantity }}</td><td class="text-right">{{ r.amount | number: '1.0-2' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="flex:1;">
+        <h3>Output</h3>
+        <table>
+          <thead><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Amount</th></tr></thead>
+          <tbody>
+            @for (o of p.outputs; track o.itemId) {
+              <tr><td>{{ o.itemName }}</td><td class="text-right">{{ o.quantity }}</td><td class="text-right">{{ o.amount | number: '1.0-2' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="text-muted" style="margin-top:10px;">Wastage: {{ p.wastageQty }} · Remarks: {{ p.remarks || '—' }}</p>
+  </div>
+}
+
+<div class="page-header" style="margin-top:20px;">
+  <div></div>
+  <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+</div>
+<div class="table-wrap">
+  @if (loading()) {
+    <p class="text-muted" style="padding:16px;">Loading…</p>
+  } @else if (productions().length === 0) {
+    <div class="empty-state">No production records yet.</div>
+  } @else {
+    <table>
+      <thead><tr><th>Production No</th><th>Date</th><th class="text-right">Raw Qty</th><th class="text-right">Output Qty</th><th class="text-right">Wastage</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        @for (p of productions(); track p.id) {
+          <tr>
+            <td>{{ p.productionNo }}</td>
+            <td>{{ p.productionDate | date: 'dd-MMM-yyyy' }}</td>
+            <td class="text-right">{{ p.totalRawMaterialQty }}</td>
+            <td class="text-right">{{ p.totalOutputQty }}</td>
+            <td class="text-right">{{ p.wastageQty }}</td>
+            <td>
+              @if (p.status === 'Cancelled') { <span class="badge badge-danger">Cancelled</span> }
+              @else { <span class="badge badge-success">Confirmed</span> }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" (click)="view(p)">View</button>
+              @if (auth.canPrint('PRODUCTION')) {
+                <button class="btn btn-outline btn-sm" (click)="printProduction(p)">Print</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
