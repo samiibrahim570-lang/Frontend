@@ -34,6 +34,14 @@ export class GatePassService {
     return this.http.post<ApiResponse<GatePassResponse>>(this.baseUrl, payload).pipe(map((r) => r.data));
   }
 
+  confirm(id: number): Observable<GatePassResponse> {
+    return this.http.post<ApiResponse<GatePassResponse>>(`${this.baseUrl}/${id}/confirm`, {}).pipe(map((r) => r.data));
+  }
+
+  unconfirm(id: number): Observable<GatePassResponse> {
+    return this.http.post<ApiResponse<GatePassResponse>>(`${this.baseUrl}/${id}/unconfirm`, {}).pipe(map((r) => r.data));
+  }
+
   cancel(id: number): Observable<void> {
     return this.http.post<ApiResponse<void>>(`${this.baseUrl}/${id}/cancel`, {}).pipe(map(() => void 0));
   }

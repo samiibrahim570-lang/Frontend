@@ -127,6 +127,7 @@ export interface CreateGatePassRequest {
   driverName?: string | null;
   vehicleNumber?: string | null;
   remarks?: string | null;
+  confirm?: boolean;
   invoiceIds: number[];
 }
 export interface GatePassItemDetail {

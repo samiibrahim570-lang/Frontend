@@ -91,6 +91,9 @@
         @if (auth.canPrint('PURCHASE')) {
           <button class="btn btn-outline btn-sm" (click)="printInvoice(p)">🖨 Print Invoice</button>
         }
+        @if (auth.canCreate('GATEPASS') && p.status !== 'Cancelled') {
+          <button class="btn btn-outline btn-sm" (click)="createGatePass(p)">🚚 Gate Pass</button>
+        }
         @if (auth.canDelete('PURCHASE') && p.status !== 'Cancelled') {
           <button class="btn btn-danger btn-sm" (click)="cancelPurchase(p)">Cancel Invoice</button>
         }

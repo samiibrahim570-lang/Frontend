@@ -97,7 +97,8 @@
       </div>
 
       <div class="flex gap-8 mt-16">
-        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Gate Pass' }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save & Confirm' }}</button>
+        <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="save(false)">Save as Draft</button>
         <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
       </div>
     </form>
@@ -108,14 +109,25 @@
   <div class="card">
     <div class="page-header mb-12">
       <div>
-        <h2>Gate Pass {{ g.gatePassNo }}</h2>
+        <h2>
+          Gate Pass {{ g.gatePassNo }}
+          <ng-container *ngTemplateOutlet="statusBadge; context: { $implicit: g.status }"></ng-container>
+        </h2>
         <p class="text-muted mb-0">
           {{ g.gatePassDate | date: 'dd-MMM-yyyy' }} · {{ g.gatePassType }} ·
           Booker: {{ g.bookerName || '—' }} · Driver: {{ g.driverName || '—' }} · Vehicle: {{ g.vehicleNumber || '—' }}
         </p>
       </div>
       <div class="flex gap-8">
-        <button class="btn btn-outline" (click)="print()">Print</button>
+        @if (auth.canPrint('GATEPASS')) {
+          <button class="btn btn-outline" (click)="print()">Print</button>
+        }
+        @if (g.status === 'Draft' && auth.canEdit('GATEPASS')) {
+          <button class="btn btn-primary" (click)="confirmGatePass(g)">Confirm</button>
+        }
+        @if (g.status === 'Confirmed' && auth.canEdit('GATEPASS')) {
+          <button class="btn btn-outline" (click)="unconfirmGatePass(g)">Unconfirm</button>
+        }
         @if (g.status !== 'Cancelled' && auth.canDelete('GATEPASS')) {
           <button class="btn btn-danger" (click)="cancelGatePass(g)">Cancel</button>
         }
@@ -188,12 +200,15 @@
               <td>{{ g.driverName || '—' }} / {{ g.vehicleNumber || '—' }}</td>
               <td class="text-right">{{ g.totalInvoices }}</td>
               <td class="text-right">{{ g.grandTotalAmount | number: '1.0-2' }}</td>
-              <td>
-                @if (g.status === 'Cancelled') { <span class="badge badge-danger">Cancelled</span> }
-                @else { <span class="badge badge-success">Confirmed</span> }
-              </td>
+              <td><ng-container *ngTemplateOutlet="statusBadge; context: { $implicit: g.status }"></ng-container></td>
               <td class="text-right">
                 <button class="btn btn-outline btn-sm" (click)="view(g)">View</button>
+                @if (g.status === 'Draft' && auth.canEdit('GATEPASS')) {
+                  <button class="btn btn-primary btn-sm" (click)="confirmGatePass(g)">Confirm</button>
+                }
+                @if (g.status === 'Confirmed' && auth.canEdit('GATEPASS')) {
+                  <button class="btn btn-outline btn-sm" (click)="unconfirmGatePass(g)">Unconfirm</button>
+                }
                 @if (auth.canPrint('GATEPASS')) {
                   <button class="btn btn-outline btn-sm" (click)="printFromList(g)">Print</button>
                 }
@@ -205,3 +220,11 @@
     }
   </div>
 }
+
+<ng-template #statusBadge let-status>
+  @switch (status) {
+    @case ('Cancelled') { <span class="badge badge-danger">Cancelled</span> }
+    @case ('Draft') { <span class="badge badge-warning">Draft</span> }
+    @default { <span class="badge badge-success">Confirmed</span> }
+  }
+</ng-template>

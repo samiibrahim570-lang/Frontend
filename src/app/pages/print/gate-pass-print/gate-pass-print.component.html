@@ -25,6 +25,8 @@
         <div class="doc-date">{{ g.gatePassDate | date: 'dd MMM, yyyy' }}</div>
         @if (g.status === 'Cancelled') {
           <div class="text-danger fw-bold mt-4">CANCELLED</div>
+        } @else if (g.status === 'Draft') {
+          <div class="text-danger fw-bold mt-4">DRAFT – NOT CONFIRMED</div>
         }
       </div>
     </div>

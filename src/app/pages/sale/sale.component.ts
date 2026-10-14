@@ -207,6 +207,11 @@ export class SaleComponent implements OnInit {
     window.open(url, '_blank');
   }
 
+  // Opens a new Gate Pass with this invoice pre-selected
+  createGatePass(s: SaleResponse): void {
+    this.router.navigate(['/gate-pass'], { queryParams: { type: 'Sale', invoiceId: s.id } });
+  }
+
   cancelSale(s: SaleResponse): void {
     if (!confirm(`Cancel Sale Invoice ${s.invoiceNo}? Stock and ledger will be reversed.`)) return;
     this.saleService.cancel(s.id).subscribe({

@@ -201,6 +201,11 @@ export class PurchaseComponent implements OnInit {
     window.open(url, '_blank');
   }
 
+  // Opens a new Gate Pass with this invoice pre-selected
+  createGatePass(p: PurchaseResponse): void {
+    this.router.navigate(['/gate-pass'], { queryParams: { type: 'Purchase', invoiceId: p.id } });
+  }
+
   cancelPurchase(p: PurchaseResponse): void {
     if (!confirm(`Cancel Purchase Invoice ${p.invoiceNo}? Stock and ledger will be reversed.`)) return;
     this.purchaseService.cancel(p.id).subscribe({
