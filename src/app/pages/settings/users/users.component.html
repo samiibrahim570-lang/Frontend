@@ -46,8 +46,8 @@
         }
         @if (editingId()) {
           <div class="form-group">
-            <label class="flex items-center gap-8" style="margin-top:8px;">
-              <input type="checkbox" formControlName="isActive" style="width:auto;" /> Active
+            <label class="flex items-center gap-8 mt-8">
+              <input class="w-auto" type="checkbox" formControlName="isActive" /> Active
             </label>
           </div>
         }
@@ -60,9 +60,9 @@
   </div>
 }
 
-<div class="table-wrap" style="margin-top:16px;">
+<div class="table-wrap mt-16">
   @if (loading()) {
-    <p class="text-muted" style="padding:16px;">Loading…</p>
+    <p class="text-muted p-16">Loading…</p>
   } @else {
     <table>
       <thead>

@@ -7,7 +7,7 @@
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="padding:32px;">Loading stock ledger…</p>
+  <p class="text-muted p-32">Loading stock ledger…</p>
 } @else {
   @if (report(); as r) {
   <div class="print-page">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="print-meta-grid" style="grid-template-columns: 1fr;">
+    <div class="print-meta-grid grid-1">
       <div class="print-meta-box">
         <div class="meta-label">Item</div>
         <div class="meta-name">{{ r.itemName }} ({{ r.itemCode }})</div>
@@ -50,7 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr style="background:#fafaf7;">
+        <tr class="bg-subtle">
           <td colspan="6"><strong>Opening Stock</strong></td>
           <td class="text-right"><strong>{{ r.openingStock | number: '1.0-2' }}</strong></td>
         </tr>

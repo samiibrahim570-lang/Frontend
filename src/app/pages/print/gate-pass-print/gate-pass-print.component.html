@@ -7,7 +7,7 @@
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="padding:32px;">Loading gate pass…</p>
+  <p class="text-muted p-32">Loading gate pass…</p>
 } @else {
   @if (gatePass(); as g) {
   <div class="print-page">
@@ -24,7 +24,7 @@
         <div class="doc-no">{{ g.gatePassNo }}</div>
         <div class="doc-date">{{ g.gatePassDate | date: 'dd MMM, yyyy' }}</div>
         @if (g.status === 'Cancelled') {
-          <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+          <div class="text-danger fw-bold mt-4">CANCELLED</div>
         }
       </div>
     </div>
@@ -43,12 +43,12 @@
     </div>
 
     @for (inv of g.invoices; track inv.invoiceId; let idx = $index) {
-      <div style="margin-bottom:16px; border:1px solid var(--color-border); border-radius:6px; overflow:hidden;">
-        <div style="background:var(--color-bg); padding:8px 12px; display:flex; justify-content:space-between; font-size:12.5px;">
+      <div class="print-group">
+        <div class="print-group-head">
           <strong>{{ idx + 1 }}. {{ inv.invoiceNo }} — {{ inv.partyName }}</strong>
           <span>{{ inv.invoiceDate | date: 'dd-MMM-yyyy' }}</span>
         </div>
-        <table class="print-table" style="margin-bottom:0;">
+        <table class="print-table mb-0">
           <thead>
             <tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Discount</th><th class="text-right">Amount</th></tr>
           </thead>
@@ -64,7 +64,7 @@
             }
           </tbody>
         </table>
-        <div style="padding:6px 12px; text-align:right; font-size:12.5px; background:#fafaf7;">
+        <div class="print-group-foot">
           <strong>Invoice Total: {{ inv.netAmount | number: '1.0-2' }}</strong>
         </div>
       </div>

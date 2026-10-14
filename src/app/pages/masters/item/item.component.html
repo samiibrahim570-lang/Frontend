@@ -64,8 +64,8 @@
       </div>
 
       <div class="form-row">
-        <label class="flex items-center gap-8"><input type="checkbox" formControlName="isRawMaterial" style="width:auto;" /> Raw Material (used in Production)</label>
-        <label class="flex items-center gap-8"><input type="checkbox" formControlName="isFinishedGood" style="width:auto;" /> Finished Good (sold / produced)</label>
+        <label class="flex items-center gap-8"><input class="w-auto" type="checkbox" formControlName="isRawMaterial" /> Raw Material (used in Production)</label>
+        <label class="flex items-center gap-8"><input class="w-auto" type="checkbox" formControlName="isFinishedGood" /> Finished Good (sold / produced)</label>
       </div>
 
       <div class="flex gap-8">
@@ -76,9 +76,9 @@
   </div>
 }
 
-<div class="table-wrap" style="margin-top: 16px;">
+<div class="table-wrap mt-16">
   @if (loading()) {
-    <p class="text-muted" style="padding:16px;">Loading…</p>
+    <p class="text-muted p-16">Loading…</p>
   } @else if (items().length === 0) {
     <div class="empty-state">No items yet. Create your first one.</div>
   } @else {

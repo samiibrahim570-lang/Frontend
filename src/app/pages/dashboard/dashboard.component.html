@@ -1,16 +1,20 @@
-<div class="welcome-banner">
-  <div>
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
     <p class="eyebrow">{{ todayDate() }}</p>
     <h1>{{ greeting() }}, {{ auth.currentUser?.fullName }} 👋</h1>
-    <p class="text-muted mb-0">Here's what's happening at the mill today.</p>
+    <p class="hero-sub">Here's what's happening at the mill today.</p>
   </div>
-  <div class="welcome-icon"><app-icon name="dashboard" [size]="34"></app-icon></div>
-</div>
+  <div class="hero-icon"><app-icon name="dashboard" [size]="32"></app-icon></div>
+</section>
 
 @if (loading()) {
-  <p class="text-muted">Loading…</p>
+  <div class="stat-grid">
+    @for (n of [1, 2, 3, 4]; track n) { <div class="stat-card skeleton"></div> }
+  </div>
 } @else {
   @if (summary(); as s) {
+    <h2 class="section-title">Today at a glance</h2>
     <div class="stat-grid">
       <div class="stat-card accent-primary">
         <div class="stat-icon"><app-icon name="sale" [size]="20"></app-icon></div>
@@ -32,6 +36,10 @@
         <div class="stat-label">Total Payable</div>
         <div class="stat-value">{{ s.totalPayable | number: '1.0-2' }}</div>
       </div>
+    </div>
+
+    <h2 class="section-title">Business overview</h2>
+    <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-icon"><app-icon name="customer" [size]="20"></app-icon></div>
         <div class="stat-label">Customers</div>
@@ -50,18 +58,17 @@
       <div class="stat-card" [class.accent-danger]="s.lowStockItemsCount > 0">
         <div class="stat-icon"><app-icon name="stockledger" [size]="20"></app-icon></div>
         <div class="stat-label">Low Stock Items</div>
-        <div class="stat-value" [style.color]="s.lowStockItemsCount > 0 ? 'var(--color-danger)' : ''">
-          {{ s.lowStockItemsCount }}
-        </div>
+        <div class="stat-value" [class.text-danger]="s.lowStockItemsCount > 0">{{ s.lowStockItemsCount }}</div>
       </div>
     </div>
 
+    <h2 class="section-title">Quick actions</h2>
     <div class="quick-links">
-      <a routerLink="/sale" class="quick-link"><app-icon name="sale" [size]="18"></app-icon> New Sale</a>
-      <a routerLink="/purchase" class="quick-link"><app-icon name="purchase" [size]="18"></app-icon> New Purchase</a>
-      <a routerLink="/production" class="quick-link"><app-icon name="production" [size]="18"></app-icon> New Production</a>
-      <a routerLink="/gate-pass" class="quick-link"><app-icon name="gatepass" [size]="18"></app-icon> New Gate Pass</a>
-      <a routerLink="/reports" class="quick-link"><app-icon name="reports" [size]="18"></app-icon> View Reports</a>
+      <a routerLink="/sale" class="quick-link"><span class="ql-icon"><app-icon name="sale" [size]="18"></app-icon></span> New Sale</a>
+      <a routerLink="/purchase" class="quick-link"><span class="ql-icon"><app-icon name="purchase" [size]="18"></app-icon></span> New Purchase</a>
+      <a routerLink="/production" class="quick-link"><span class="ql-icon"><app-icon name="production" [size]="18"></app-icon></span> New Production</a>
+      <a routerLink="/gate-pass" class="quick-link"><span class="ql-icon"><app-icon name="gatepass" [size]="18"></app-icon></span> New Gate Pass</a>
+      <a routerLink="/reports" class="quick-link"><span class="ql-icon"><app-icon name="reports" [size]="18"></app-icon></span> View Reports</a>
     </div>
   }
 }

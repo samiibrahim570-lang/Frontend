@@ -1,16 +1,16 @@
 :host {
-  --ink: #0f1b2a;
+  --ink: var(--color-text);
   --ink-soft: #4b5869;
   --ink-muted: #8a94a3;
-  --line: #e6e9ee;
-  --line-strong: #d4d9e0;
-  --surface: #ffffff;
-  --page: #f6f7f9;
-  --accent: #1e3a5f;
+  --line: var(--color-border);
+  --line-strong: var(--color-border-strong);
+  --surface: var(--color-surface);
+  --page: var(--color-bg);
+  --accent: var(--color-primary);
   --accent-hover: #16304f;
   --accent-soft: rgba(30, 58, 95, 0.12);
-  --panel-from: #0f2238;
-  --panel-to: #1e3a5f;
+  --panel-from: var(--color-primary-dark);
+  --panel-to: var(--color-primary);
 
   display: block;
 }
@@ -26,7 +26,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   background: var(--page);
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }

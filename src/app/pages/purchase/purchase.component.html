@@ -32,11 +32,11 @@
         <div class="form-group"><label>Vehicle Number</label><input type="text" formControlName="vehicleNumber" /></div>
       </div>
 
-      <h3 style="margin-top:18px;">Items</h3>
+      <h3 class="mt-20">Items</h3>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Item</th><th style="width:110px;">Qty</th><th style="width:110px;">Rate</th><th style="width:110px;">Discount</th><th class="text-right" style="width:110px;">Total</th><th style="width:50px;"></th></tr>
+            <tr><th>Item</th><th class="w-110">Qty</th><th class="w-110">Rate</th><th class="w-110">Discount</th><th class="text-right w-110">Total</th><th class="w-50"></th></tr>
           </thead>
           <tbody formArrayName="items">
             @for (row of itemRows.controls; track $index; let i = $index) {
@@ -57,22 +57,22 @@
           </tbody>
         </table>
       </div>
-      <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px;" (click)="addItemRow()">+ Add Item</button>
+      <button type="button" class="btn btn-outline btn-sm mt-12" (click)="addItemRow()">+ Add Item</button>
 
-      <div class="form-row" style="margin-top:18px;">
+      <div class="form-row mt-20">
         <div class="form-group"><label>Discount</label><input type="number" formControlName="discountAmount" step="0.01" /></div>
         <div class="form-group"><label>Tax</label><input type="number" formControlName="taxAmount" step="0.01" /></div>
         <div class="form-group"><label>Paid Amount</label><input type="number" formControlName="paidAmount" step="0.01" /></div>
         <div class="form-group"><label>Remarks</label><input type="text" formControlName="remarks" /></div>
       </div>
 
-      <div class="card" style="background: var(--color-bg); border-style: dashed;">
+      <div class="summary-box">
         <div class="flex justify-between"><span>Items Subtotal</span><strong>{{ itemsSubTotal() | number: '1.0-2' }}</strong></div>
         <div class="flex justify-between"><span>Net Amount</span><strong>{{ netAmount() | number: '1.0-2' }}</strong></div>
         <div class="flex justify-between"><span>Balance Due</span><strong [style.color]="balanceAmount() > 0 ? 'var(--color-warning)' : 'var(--color-success)'">{{ balanceAmount() | number: '1.0-2' }}</strong></div>
       </div>
 
-      <div class="flex gap-8" style="margin-top:16px;">
+      <div class="flex gap-8 mt-16">
         <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Invoice' }}</button>
         <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
       </div>
@@ -114,7 +114,7 @@
         </tbody>
       </table>
     </div>
-    <div style="margin-top:14px; max-width:280px; margin-left:auto;">
+    <div class="totals-box mt-12">
       <div class="flex justify-between"><span class="text-muted">Net Amount</span><strong>{{ p.netAmount | number: '1.0-2' }}</strong></div>
       <div class="flex justify-between"><span class="text-muted">Paid</span><strong>{{ p.paidAmount | number: '1.0-2' }}</strong></div>
       <div class="flex justify-between"><span class="text-muted">Balance</span><strong>{{ p.balanceAmount | number: '1.0-2' }}</strong></div>
@@ -122,14 +122,14 @@
   </div>
 }
 
-<div class="page-header" style="margin-top:20px;">
-  <input type="text" placeholder="Search invoice no / supplier…" style="max-width:280px;" (change)="search($any($event.target).value)" />
+<div class="page-header mt-20">
+  <input class="search-input" type="text" placeholder="Search invoice no / supplier…" (change)="search($any($event.target).value)" />
   <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
 </div>
 
 <div class="table-wrap">
   @if (loading()) {
-    <p class="text-muted" style="padding:16px;">Loading…</p>
+    <p class="text-muted p-16">Loading…</p>
   } @else if (purchases().length === 0) {
     <div class="empty-state">No purchase invoices yet.</div>
   } @else {

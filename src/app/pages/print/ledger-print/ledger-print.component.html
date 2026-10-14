@@ -7,7 +7,7 @@
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="padding:32px;">Loading statement…</p>
+  <p class="text-muted p-32">Loading statement…</p>
 } @else {
   @if (report(); as r) {
   <div class="print-page">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="print-meta-grid" style="grid-template-columns: 1fr;">
+    <div class="print-meta-grid grid-1">
       <div class="print-meta-box">
         <div class="meta-label">{{ partyType() === 'customer' ? 'Customer' : 'Supplier' }}</div>
         <div class="meta-name">{{ r.partyName }}</div>
@@ -49,7 +49,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr style="background:#fafaf7;">
+        <tr class="bg-subtle">
           <td colspan="6"><strong>Opening Balance</strong></td>
           <td class="text-right"><strong>{{ r.openingBalance | number: '1.0-2' }}</strong></td>
         </tr>

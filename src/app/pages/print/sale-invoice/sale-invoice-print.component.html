@@ -7,7 +7,7 @@
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="padding:32px;">Loading invoice…</p>
+  <p class="text-muted p-32">Loading invoice…</p>
 } @else {
   @if (invoice(); as inv) {
   <div class="print-page">
@@ -25,7 +25,7 @@
         <div class="doc-no">{{ inv.invoiceNo }}</div>
         <div class="doc-date">{{ inv.invoiceDate | date: 'dd MMM, yyyy' }}</div>
         @if (inv.status === 'Cancelled') {
-          <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+          <div class="text-danger fw-bold mt-4">CANCELLED</div>
         }
       </div>
     </div>
@@ -47,12 +47,12 @@
     <table class="print-table">
       <thead>
         <tr>
-          <th style="width:32px;">#</th>
+          <th class="w-32">#</th>
           <th>Item</th>
-          <th class="text-right" style="width:90px;">Qty</th>
-          <th class="text-right" style="width:90px;">Rate</th>
-          <th class="text-right" style="width:90px;">Discount</th>
-          <th class="text-right" style="width:100px;">Amount</th>
+          <th class="text-right w-90">Qty</th>
+          <th class="text-right w-90">Rate</th>
+          <th class="text-right w-90">Discount</th>
+          <th class="text-right w-100">Amount</th>
         </tr>
       </thead>
       <tbody>
@@ -70,7 +70,7 @@
     </table>
 
     @if (inv.remarks) {
-      <p style="font-size:12px;"><strong>Remarks:</strong> {{ inv.remarks }}</p>
+      <p class="text-xs"><strong>Remarks:</strong> {{ inv.remarks }}</p>
     }
 
     <div class="print-summary">

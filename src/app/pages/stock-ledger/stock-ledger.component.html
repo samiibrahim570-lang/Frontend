@@ -24,19 +24,19 @@
       <label>To</label>
       <input type="date" [(ngModel)]="toDate" />
     </div>
-    <div class="form-group" style="justify-content: flex-end;">
+    <div class="form-group justify-end">
       <button class="btn btn-primary" (click)="view()" [disabled]="!selectedItemId">View Ledger</button>
     </div>
   </div>
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="margin-top:16px;">Loading…</p>
+  <p class="text-muted mt-16">Loading…</p>
 }
 
 @if (report(); as r) {
-  <div class="card" style="margin-top:16px;">
-    <div class="page-header" style="margin-bottom:12px;">
+  <div class="card mt-16">
+    <div class="page-header mb-12">
       <div>
         <h2>{{ r.itemName }} <span class="text-muted">({{ r.itemCode }})</span></h2>
         <p class="text-muted mb-0">

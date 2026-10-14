@@ -33,9 +33,9 @@
   </div>
 }
 
-<div class="table-wrap" style="margin-top: 16px;">
+<div class="table-wrap mt-16">
   @if (loading()) {
-    <p class="text-muted" style="padding:16px;">Loading…</p>
+    <p class="text-muted p-16">Loading…</p>
   } @else if (categories().length === 0) {
     <div class="empty-state">No categories yet. Create your first one.</div>
   } @else {

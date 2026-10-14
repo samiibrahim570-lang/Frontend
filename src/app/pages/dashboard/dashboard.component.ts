@@ -10,7 +10,8 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink, IconComponent],
-  templateUrl: './dashboard.component.html'
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   private reportService = inject(ReportService);

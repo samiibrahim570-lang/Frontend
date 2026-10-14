@@ -6,7 +6,7 @@
 </div>
 
 <div class="card">
-  <div class="flex gap-12" style="margin-bottom:16px;">
+  <div class="flex gap-12 mb-16">
     <button class="btn" [class.btn-primary]="partyType === 'Customer'" [class.btn-outline]="partyType !== 'Customer'" (click)="switchType('Customer')">Customer Ledger</button>
     <button class="btn" [class.btn-primary]="partyType === 'Supplier'" [class.btn-outline]="partyType !== 'Supplier'" (click)="switchType('Supplier')">Supplier Ledger</button>
   </div>
@@ -35,19 +35,19 @@
       <label>To</label>
       <input type="date" [(ngModel)]="toDate" />
     </div>
-    <div class="form-group" style="justify-content: flex-end;">
+    <div class="form-group justify-end">
       <button class="btn btn-primary" (click)="view()" [disabled]="!selectedPartyId">View Statement</button>
     </div>
   </div>
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="margin-top:16px;">Loading…</p>
+  <p class="text-muted mt-16">Loading…</p>
 }
 
 @if (report(); as r) {
-  <div class="card" style="margin-top:16px;">
-    <div class="page-header" style="margin-bottom:12px;">
+  <div class="card mt-16">
+    <div class="page-header mb-12">
       <div>
         <h2>{{ r.partyName }}</h2>
         <p class="text-muted mb-0">Opening Balance: {{ r.openingBalance | number: '1.0-2' }} | Closing Balance: <strong>{{ r.closingBalance | number: '1.0-2' }}</strong></p>
@@ -88,7 +88,7 @@
     </div>
   </div>
 } @else if (!loading()) {
-  <div class="card" style="margin-top:16px;">
+  <div class="card mt-16">
     <h3>Balances Overview</h3>
     <div class="table-wrap">
       <table>

@@ -7,7 +7,7 @@
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="padding:32px;">Loading production record…</p>
+  <p class="text-muted p-32">Loading production record…</p>
 } @else {
   @if (record(); as p) {
     <div class="print-page">
@@ -24,7 +24,7 @@
           <div class="doc-no">{{ p.productionNo }}</div>
           <div class="doc-date">{{ p.productionDate | date: 'dd MMM, yyyy' }}</div>
           @if (p.status === 'Cancelled') {
-            <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+            <div class="text-danger fw-bold mt-4">CANCELLED</div>
           }
         </div>
       </div>
@@ -58,7 +58,7 @@
       </table>
 
       @if (p.remarks) {
-        <p style="font-size:12px;"><strong>Remarks:</strong> {{ p.remarks }}</p>
+        <p class="text-xs"><strong>Remarks:</strong> {{ p.remarks }}</p>
       }
 
       <div class="print-summary">

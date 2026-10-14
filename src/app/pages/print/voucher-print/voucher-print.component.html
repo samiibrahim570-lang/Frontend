@@ -7,10 +7,10 @@
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="padding:32px;">Loading voucher…</p>
+  <p class="text-muted p-32">Loading voucher…</p>
 } @else {
   @if (voucher(); as v) {
-    <div class="print-page" style="max-width: 560px;">
+    <div class="print-page narrow">
       <div class="print-header">
         <div class="print-company">
           <div class="mark">FF</div>
@@ -24,12 +24,12 @@
           <div class="doc-no">{{ v.voucherNo }}</div>
           <div class="doc-date">{{ v.voucherDate | date: 'dd MMM, yyyy' }}</div>
           @if (v.status === 'Cancelled') {
-            <div style="color: var(--color-danger); font-weight:700; margin-top:4px;">CANCELLED</div>
+            <div class="text-danger fw-bold mt-4">CANCELLED</div>
           }
         </div>
       </div>
 
-      <div class="print-meta-box" style="margin-bottom:20px;">
+      <div class="print-meta-box mb-20">
         <div class="meta-label">{{ v.partyType }}</div>
         <div class="meta-name">{{ v.partyName || '—' }}</div>
         <div class="meta-line">Payment Mode: {{ v.paymentMode }}</div>
@@ -37,7 +37,7 @@
         @if (v.narration) { <div class="meta-line">Narration: {{ v.narration }}</div> }
       </div>
 
-      <div class="print-summary" style="width: 100%;">
+      <div class="print-summary w-full">
         <div class="row total"><span>Amount</span><span>{{ v.amount | number: '1.0-2' }}</span></div>
       </div>
 
@@ -47,6 +47,6 @@
       </div>
     </div>
   } @else {
-    <p style="padding:32px;">Voucher not found.</p>
+    <p class="p-32">Voucher not found.</p>
   }
 }

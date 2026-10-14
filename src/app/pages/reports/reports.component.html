@@ -13,7 +13,7 @@
 </div>
 
 <div class="card">
-  <div class="flex gap-8" style="margin-bottom:16px;">
+  <div class="flex gap-8 mb-16">
     <button class="btn" [class.btn-primary]="activeTab()==='sale'" [class.btn-outline]="activeTab()!=='sale'" (click)="setTab('sale')">Sale</button>
     <button class="btn" [class.btn-primary]="activeTab()==='purchase'" [class.btn-outline]="activeTab()!=='purchase'" (click)="setTab('purchase')">Purchase</button>
     <button class="btn" [class.btn-primary]="activeTab()==='production'" [class.btn-outline]="activeTab()!=='production'" (click)="setTab('production')">Production / Pisai</button>
@@ -32,21 +32,21 @@
       </div>
     } @else {
       <div class="form-group">
-        <label class="flex items-center gap-8"><input type="checkbox" [(ngModel)]="lowStockOnly" style="width:auto;" /> Low stock only</label>
+        <label class="flex items-center gap-8"><input class="w-auto" type="checkbox" [(ngModel)]="lowStockOnly" /> Low stock only</label>
       </div>
     }
-    <div class="form-group" style="justify-content:flex-end;">
+    <div class="form-group justify-end">
       <button class="btn btn-primary" (click)="run()">Run Report</button>
     </div>
   </div>
 </div>
 
 @if (loading()) {
-  <p class="text-muted" style="margin-top:16px;">Loading…</p>
+  <p class="text-muted mt-16">Loading…</p>
 }
 
 @if (!loading() && activeTab() === 'sale') {
-  <div class="table-wrap" style="margin-top:16px;">
+  <div class="table-wrap mt-16">
     <table>
       <thead><tr><th>Date</th><th>Invoice No</th><th>Customer</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
       <tbody>
@@ -71,7 +71,7 @@
 }
 
 @if (!loading() && activeTab() === 'purchase') {
-  <div class="table-wrap" style="margin-top:16px;">
+  <div class="table-wrap mt-16">
     <table>
       <thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
       <tbody>
@@ -96,7 +96,7 @@
 }
 
 @if (!loading() && activeTab() === 'production') {
-  <div class="table-wrap" style="margin-top:16px;">
+  <div class="table-wrap mt-16">
     <table>
       <thead><tr><th>Date</th><th>Production No</th><th class="text-right">Raw Material Qty</th><th class="text-right">Output Qty</th><th class="text-right">Wastage</th></tr></thead>
       <tbody>
@@ -117,7 +117,7 @@
 }
 
 @if (!loading() && activeTab() === 'stock') {
-  <div class="table-wrap" style="margin-top:16px;">
+  <div class="table-wrap mt-16">
     <table>
       <thead><tr><th>Code</th><th>Item</th><th>Category</th><th>UOM</th><th class="text-right">Opening</th><th class="text-right">Current</th><th class="text-right">Reorder Level</th></tr></thead>
       <tbody>

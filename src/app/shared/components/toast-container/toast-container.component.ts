@@ -24,20 +24,21 @@ import { ToastService } from '../../../core/services/toast.service';
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-width: 340px;
+      max-width: min(340px, calc(100vw - 32px));
     }
     .toast {
       padding: 12px 16px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       color: #fff;
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-md);
+      font-weight: 500;
       cursor: pointer;
       animation: slideIn 0.2s ease-out;
     }
-    .toast.success { background: #1e8e3e; }
-    .toast.error { background: #d93025; }
-    .toast.info { background: #1a73e8; }
+    .toast.success { background: var(--color-success); }
+    .toast.error { background: var(--color-danger); }
+    .toast.info { background: var(--color-primary); }
     @keyframes slideIn {
       from { transform: translateX(20px); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
