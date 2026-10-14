@@ -122,7 +122,7 @@
       <thead><tr><th>Code</th><th>Item</th><th>Category</th><th>UOM</th><th class="text-right">Opening</th><th class="text-right">Current</th><th class="text-right">Reorder Level</th></tr></thead>
       <tbody>
         @for (r of stockReport(); track r.itemCode) {
-          <tr>
+          <tr [class.row-low-stock]="r.currentStock <= r.reorderLevel">
             <td>{{ r.itemCode }}</td>
             <td>{{ r.itemName }}</td>
             <td class="text-muted">{{ r.categoryName }}</td>

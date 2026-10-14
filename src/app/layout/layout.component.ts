@@ -5,6 +5,9 @@ import { AuthService } from '../core/services/auth.service';
 import { IconComponent } from '../shared/components/icon/icon.component';
 import { MENU_GROUPS, MENU_ICON_MAP } from '../shared/config/menu-groups.config';
 import { MenuPermission } from '../core/models/auth.model';
+import { StockAlertService } from '../core/services/stock-alert.service';
+import { NotificationBellComponent } from '../shared/components/notification-bell/notification-bell.component';
+import { ThemeSwitcherComponent } from '../shared/components/theme-switcher/theme-switcher.component';
 
 interface DisplayGroup {
   label: string;
@@ -14,12 +17,13 @@ interface DisplayGroup {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, IconComponent, NotificationBellComponent, ThemeSwitcherComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent {
   authService = inject(AuthService);
+  stock = inject(StockAlertService);
   private router = inject(Router);
 
   sidebarOpen = true;

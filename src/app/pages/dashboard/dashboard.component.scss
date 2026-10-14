@@ -105,7 +105,7 @@
   background: rgba(var(--color-primary-rgb), 0.08);
   transition: background-color 0.15s ease, color 0.15s ease;
 }
-.quick-link:hover .ql-icon { background: var(--color-primary); color: #fff; }
+.quick-link:hover .ql-icon { background: var(--color-primary); color: var(--color-on-primary); }
 
 @media (max-width: 640px) {
   .hero { padding: 22px 20px; margin-bottom: 20px; }

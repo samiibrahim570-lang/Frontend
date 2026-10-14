@@ -30,6 +30,9 @@
               @if (sidebarOpen) {
                 <span>{{ menu.menuName }}</span>
               }
+              @if (menu.menuKey.toUpperCase() === 'ITEM' && stock.count() > 0) {
+                <span class="count-badge" [title]="stock.count() + ' items at or below reorder level'">{{ stock.count() > 99 ? '99+' : stock.count() }}</span>
+              }
             </a>
           }
         </div>
@@ -50,15 +53,19 @@
         <app-icon name="menu" [size]="20"></app-icon>
       </button>
       <div class="spacer"></div>
+      <div class="topbar-actions">
+        <app-theme-switcher></app-theme-switcher>
+        <app-notification-bell></app-notification-bell>
+      </div>
       <div class="user-chip">
         <div class="avatar">{{ authService.currentUser?.fullName?.charAt(0) }}</div>
         <div class="user-info">
           <div class="user-name">{{ authService.currentUser?.fullName }}</div>
           <div class="user-role text-muted">{{ authService.currentUser?.roleName }}</div>
         </div>
-        <button class="btn btn-outline btn-sm" (click)="logout()">
+        <button class="btn btn-outline btn-sm" (click)="logout()" title="Logout">
           <app-icon name="logout" [size]="14"></app-icon>
-          Logout
+          <span class="logout-label">Logout</span>
         </button>
       </div>
     </header>

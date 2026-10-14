@@ -6,6 +6,7 @@ import { Category, Item } from '../../../core/models/master.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ExportService } from '../../../core/services/export.service';
+import { isLowStock } from '../../../core/services/stock-alert.service';
 
 @Component({
   selector: 'app-item',
@@ -51,6 +52,10 @@ export class ItemComponent implements OnInit {
       next: (data) => { this.items.set(data); this.loading.set(false); },
       error: () => this.loading.set(false)
     });
+  }
+
+  isLow(i: Item): boolean {
+    return isLowStock(i.currentStock, i.reorderLevel);
   }
 
   openCreate(): void {

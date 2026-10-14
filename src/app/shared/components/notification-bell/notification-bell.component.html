@@ -1,0 +1,94 @@
+<button
+  type="button"
+  class="bell-btn"
+  [class.active]="open()"
+  [class.has-alerts]="stock.count() > 0"
+  (click)="toggle()"
+  [attr.aria-expanded]="open()"
+  aria-haspopup="dialog"
+  [attr.aria-label]="stock.count() ? stock.count() + (stock.count() > 1 ? ' low stock alerts' : ' low stock alert') : 'Notifications'"
+  title="Stock alerts"
+>
+  <app-icon name="bell" [size]="20"></app-icon>
+  @if (stock.count() > 0) {
+    <span class="count-badge" [class.pulse]="stock.unreadCount() > 0">{{ stock.count() > 99 ? '99+' : stock.count() }}</span>
+  }
+</button>
+
+@if (open()) {
+  <div class="dropdown-panel bell-panel" role="dialog" aria-label="Low stock alerts">
+    <div class="dropdown-head">
+      <div>
+        <div class="dropdown-title">Stock alerts</div>
+        <div class="text-xs text-muted">
+          @if (stock.count()) {
+            {{ stock.count() }} item{{ stock.count() > 1 ? 's' : '' }} at or below reorder level
+            @if (stock.outOfStockCount()) { · <span class="text-danger">{{ stock.outOfStockCount() }} out of stock</span> }
+          } @else {
+            Items reaching their reorder level appear here
+          }
+        </div>
+      </div>
+      <button type="button" class="link-btn" (click)="stock.markAllRead()" [disabled]="!stock.unreadCount()">Mark all read</button>
+    </div>
+
+    <div class="bell-list">
+      @if (!stock.available()) {
+        <div class="bell-empty">
+          <app-icon name="alert" [size]="22"></app-icon>
+          <div>Stock alerts are unavailable for your role.</div>
+        </div>
+      } @else if (!stock.loaded()) {
+        @for (n of [1, 2, 3]; track n) { <div class="bell-skeleton"></div> }
+      } @else {
+        @for (a of stock.bySeverity(); track a.key) {
+          <div class="alert-row" [class.unread]="a.unread">
+            <div class="alert-icon" [class.out]="a.status === 'out'">
+              <app-icon name="alert" [size]="16"></app-icon>
+            </div>
+            <div class="alert-body">
+              <div class="alert-top">
+                <span class="alert-name" [title]="a.itemName">{{ a.itemName }}</span>
+                @if (a.unread) { <span class="new-chip">New</span> }
+                <span class="badge" [class.badge-danger]="a.status === 'out'" [class.badge-warning]="a.status === 'low'">
+                  {{ a.status === 'out' ? 'Out of stock' : 'Low stock' }}
+                </span>
+              </div>
+              <div class="alert-meta text-xs text-muted">
+                {{ a.itemCode }} · Available <strong [class.text-danger]="a.status === 'out'">{{ a.currentStock | number: '1.0-2' }} {{ a.unitOfMeasure }}</strong>
+                · Min {{ a.reorderLevel | number: '1.0-2' }}
+              </div>
+              <div class="stock-bar" [class.out]="a.status === 'out'"><span [style.width.%]="a.stockPercent"></span></div>
+              <div class="alert-actions text-xs">
+                <span class="text-muted">Since {{ a.raisedAt | date: 'd MMM, h:mm a' }}</span>
+                <span class="flex gap-8">
+                  @if (a.itemId && auth.canView('STOCKLEDGER')) {
+                    <a [routerLink]="['/stock-ledger']" [queryParams]="{ itemId: a.itemId }" (click)="close()">Ledger</a>
+                  }
+                  @if (auth.canView('PURCHASE')) {
+                    <a routerLink="/purchase" (click)="close()">Restock</a>
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="bell-empty ok">
+            <app-icon name="check" [size]="22"></app-icon>
+            <div>All items are above their reorder level.</div>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="dropdown-foot">
+      <button type="button" class="link-btn refresh" (click)="stock.refresh()" [disabled]="stock.loading()">
+        <app-icon name="refresh" [size]="13" [class.spin]="stock.loading()"></app-icon>
+        @if (stock.lastUpdated(); as t) { Updated {{ t | date: 'h:mm a' }} } @else { Refresh }
+      </button>
+      @if (viewAllLink; as link) {
+        <a class="link-btn" [routerLink]="link" (click)="close()">View all items <app-icon name="arrow-right" [size]="12"></app-icon></a>
+      }
+    </div>
+  </div>
+}

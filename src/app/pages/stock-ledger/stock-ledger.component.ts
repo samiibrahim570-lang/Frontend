@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StockLedgerService } from '../../core/services/ledger.service';
 import { ItemService } from '../../core/services/master.service';
 import { Item } from '../../core/models/master.model';
@@ -19,6 +20,8 @@ export class StockLedgerComponent implements OnInit {
   private stockLedgerService = inject(StockLedgerService);
   private itemService = inject(ItemService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private exportService = inject(ExportService);
   auth = inject(AuthService);
 
@@ -32,6 +35,16 @@ export class StockLedgerComponent implements OnInit {
 
   ngOnInit(): void {
     this.itemService.getAll().subscribe((d) => this.items.set(d));
+
+    // Deep link from stock alerts: /stock-ledger?itemId=12
+    // (subscribed, so clicking another alert while already on this page still switches item)
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const itemId = Number(params.get('itemId'));
+      if (itemId) {
+        this.selectedItemId = itemId;
+        this.view();
+      }
+    });
   }
 
   view(): void {

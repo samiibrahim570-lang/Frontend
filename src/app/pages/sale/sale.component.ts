@@ -10,6 +10,7 @@ import { defaultPagedRequest, PagedRequest } from '../../core/models/common.mode
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ExportService } from '../../core/services/export.service';
+import { StockAlertService } from '../../core/services/stock-alert.service';
 
 @Component({
   selector: 'app-sale',
@@ -27,6 +28,7 @@ export class SaleComponent implements OnInit {
   private router = inject(Router);
   private exportService = inject(ExportService);
   auth = inject(AuthService);
+  stock = inject(StockAlertService);
 
   sales = signal<SaleResponse[]>([]);
   totalCount = signal(0);

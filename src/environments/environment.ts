@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:7220/api'
+  apiUrl: 'http://fish-feed.runasp.net/api'
 };

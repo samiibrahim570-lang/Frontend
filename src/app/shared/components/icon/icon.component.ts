@@ -102,6 +102,31 @@ import { Component, Input } from '@angular/core';
         @case ('back') {
           <path d="M19 12H5M12 19l-7-7 7-7"/>
         }
+        @case ('bell') {
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        }
+        @case ('palette') {
+          <path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-1.8a1.7 1.7 0 0 0-1.3 2.8 1.7 1.7 0 0 1-1.3 2.9z"/>
+          <circle cx="7.5" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="10.5" cy="7" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="15.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/>
+        }
+        @case ('check') {
+          <path d="M20 6 9 17l-5-5"/>
+        }
+        @case ('alert') {
+          <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+          <path d="M12 9v4M12 17h.01"/>
+        }
+        @case ('refresh') {
+          <path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/>
+          <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/>
+          <path d="M21 3v5h-5M3 21v-5h5"/>
+        }
+        @case ('arrow-right') {
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        }
         @default {
           <circle cx="12" cy="12" r="8"/>
         }

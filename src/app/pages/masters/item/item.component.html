@@ -97,7 +97,7 @@
       </thead>
       <tbody>
         @for (i of items(); track i.id) {
-          <tr>
+          <tr [class.row-low-stock]="isLow(i)">
             <td>{{ i.itemCode }}</td>
             <td>{{ i.itemName }}</td>
             <td class="text-muted">{{ i.categoryName }}</td>
@@ -106,8 +106,12 @@
               @if (i.isRawMaterial) { <span class="badge badge-warning">Raw</span> }
               @if (i.isFinishedGood) { <span class="badge badge-success">Finished</span> }
             </td>
-            <td class="text-right" [style.color]="i.currentStock <= i.reorderLevel ? 'var(--color-danger)' : ''">
+            <td class="text-right" [class.text-danger]="isLow(i)">
               {{ i.currentStock | number: '1.0-2' }}
+              @if (isLow(i)) {
+                <div><span class="badge" [class.badge-danger]="i.currentStock <= 0" [class.badge-warning]="i.currentStock > 0"
+                  [title]="'Reorder level: ' + (i.reorderLevel | number: '1.0-2')">{{ i.currentStock <= 0 ? 'Out of stock' : 'Low stock' }}</span></div>
+              }
             </td>
             <td class="text-right">{{ i.salePrice | number: '1.0-2' }}</td>
             <td class="text-right">

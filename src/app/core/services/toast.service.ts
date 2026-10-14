@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export interface Toast {
   id: number;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +22,9 @@ export class ToastService {
   }
   error(message: string) {
     this.push(message, 'error');
+  }
+  warning(message: string) {
+    this.push(message, 'warning');
   }
   info(message: string) {
     this.push(message, 'info');

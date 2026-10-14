@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { CrudService } from './crud.service';
 import { Booker, Category, Customer, Item, Supplier } from '../models/master.model';
@@ -19,13 +19,13 @@ export class ItemService extends CrudService<Item> {
   }
 
   // Override to support rawMaterialOnly/finishedGoodOnly query filters used by Production forms
-  override getAll(rawMaterialOnly?: boolean, finishedGoodOnly?: boolean) {
+  override getAll(rawMaterialOnly?: boolean, finishedGoodOnly?: boolean, context?: HttpContext) {
     let params = new HttpParams();
     if (rawMaterialOnly) params = params.set('rawMaterialOnly', rawMaterialOnly);
     if (finishedGoodOnly) params = params.set('finishedGoodOnly', finishedGoodOnly);
 
     return this.http
-      .get<ApiResponse<Item[]>>(this.baseUrl, { params })
+      .get<ApiResponse<Item[]>>(this.baseUrl, { params, context })
       .pipe(map((r) => r.data));
   }
 }

@@ -18,7 +18,7 @@ import { ToastService } from '../../../core/services/toast.service';
   styles: [`
     .toast-wrap {
       position: fixed;
-      top: 16px;
+      top: 76px; /* below the app header so the bell / theme buttons stay clickable */
       right: 16px;
       z-index: 9999;
       display: flex;
@@ -39,6 +39,7 @@ import { ToastService } from '../../../core/services/toast.service';
     .toast.success { background: var(--color-success); }
     .toast.error { background: var(--color-danger); }
     .toast.info { background: var(--color-primary); }
+    .toast.warning { background: var(--color-warning-solid); }
     @keyframes slideIn {
       from { transform: translateX(20px); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }

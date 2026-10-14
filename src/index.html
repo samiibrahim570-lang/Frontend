@@ -6,6 +6,18 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f2238">
+  <script>
+    // Apply the saved theme before Angular boots to avoid a flash of the default theme (see ThemeService).
+    (function () {
+      try {
+        var u = JSON.parse(localStorage.getItem('ffm_user') || 'null');
+        var p = (u && localStorage.getItem('ffm_theme_user_' + u.userId)) || localStorage.getItem('ffm_theme') || 'light';
+        if (p === 'system') p = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', p);
+        document.documentElement.style.colorScheme = p === 'dark' ? 'dark' : 'light';
+      } catch (e) {}
+    })();
+  </script>
   <link rel="icon" type="image/x-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSm-T_CmfMAfKpPr2yP7yHdmfN04UCzJIWC7HhyzZ4dRxp2n_dr-o8TbCc&s=10">
 </head>
 <body>

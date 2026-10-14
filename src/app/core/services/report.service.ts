@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -41,10 +41,10 @@ export class ReportService {
     return this.http.get<ApiResponse<ProductionReportItem[]>>(`${this.baseUrl}/production`, { params }).pipe(map((r) => r.data));
   }
 
-  getStockReport(lowStockOnly?: boolean): Observable<StockReportItem[]> {
+  getStockReport(lowStockOnly?: boolean, context?: HttpContext): Observable<StockReportItem[]> {
     let params = new HttpParams();
     if (lowStockOnly) params = params.set('lowStockOnly', lowStockOnly);
-    return this.http.get<ApiResponse<StockReportItem[]>>(`${this.baseUrl}/stock`, { params }).pipe(map((r) => r.data));
+    return this.http.get<ApiResponse<StockReportItem[]>>(`${this.baseUrl}/stock`, { params, context }).pipe(map((r) => r.data));
   }
 
   getDashboard(): Observable<DashboardSummary> {

@@ -1,14 +1,14 @@
 :host {
   --ink: var(--color-text);
-  --ink-soft: #4b5869;
-  --ink-muted: #8a94a3;
+  --ink-soft: var(--color-text-soft);
+  --ink-muted: var(--color-text-muted);
   --line: var(--color-border);
   --line-strong: var(--color-border-strong);
   --surface: var(--color-surface);
   --page: var(--color-bg);
   --accent: var(--color-primary);
-  --accent-hover: #16304f;
-  --accent-soft: rgba(30, 58, 95, 0.12);
+  --accent-hover: var(--color-primary-dark);
+  --accent-soft: rgba(var(--color-primary-rgb), 0.12);
   --panel-from: var(--color-primary-dark);
   --panel-to: var(--color-primary);
 
@@ -99,7 +99,7 @@
 .visual-copy { margin-top: auto; padding-top: 64px; }
 .visual-copy h1 {
   margin: 0 0 14px;
-  color: #ffff;
+  color: #fff;
   font-size: clamp(26px, 2.6vw, 34px);
   line-height: 1.22;
   font-weight: 600;
@@ -131,7 +131,7 @@
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
-  color: #9fd0ff;
+  color: var(--color-accent-light);
 }
 .feature-icon svg { width: 12px; height: 12px; }
 
@@ -204,16 +204,16 @@ h2 {
   font: inherit;
   font-size: 14.5px;
   color: var(--ink);
-  background: #fbfcfd;
+  background: var(--color-input-bg);
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
-.input-wrap input::placeholder { color: #aab2bd; }
-.input-wrap input:hover { border-color: #bfc6cf; }
+.input-wrap input::placeholder { color: var(--color-placeholder); }
+.input-wrap input:hover { border-color: var(--color-border-hover); }
 .input-wrap input:focus {
-  background: #fff;
+  background: var(--surface);
   border-color: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-soft);
 }
@@ -221,10 +221,10 @@ h2 {
 
 /* Angular validation state (only shows once the user has touched the field) */
 .input-wrap input.ng-invalid.ng-touched {
-  border-color: #d64545;
+  border-color: var(--color-danger);
 }
 .input-wrap input.ng-invalid.ng-touched:focus {
-  box-shadow: 0 0 0 4px rgba(214, 69, 69, 0.12);
+  box-shadow: 0 0 0 4px rgba(var(--color-danger-rgb), 0.12);
 }
 
 .password-field input { padding-right: 48px; }
@@ -243,7 +243,7 @@ h2 {
   transition: color 0.15s, background-color 0.15s;
 }
 .toggle-visibility svg { width: 18px; height: 18px; }
-.toggle-visibility:hover { color: var(--ink); background: #eef1f4; }
+.toggle-visibility:hover { color: var(--ink); background: var(--color-hover); }
 .toggle-visibility:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--accent-soft);
@@ -266,12 +266,12 @@ h2 {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 27, 42, 0.12), 0 6px 16px -6px rgba(30, 58, 95, 0.5);
+  box-shadow: 0 1px 2px rgba(15, 27, 42, 0.12), 0 6px 16px -6px rgba(var(--color-primary-rgb), 0.5);
   transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .btn-submit:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 1px 2px rgba(15, 27, 42, 0.14), 0 10px 22px -8px rgba(30, 58, 95, 0.6);
+  box-shadow: 0 1px 2px rgba(15, 27, 42, 0.14), 0 10px 22px -8px rgba(var(--color-primary-rgb), 0.6);
 }
 .btn-submit:active:not(:disabled) { transform: translateY(1px); }
 .btn-submit:focus-visible {
@@ -333,7 +333,7 @@ h2 {
     min-height: 100vh;
     min-height: 100dvh;
     background:
-      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30, 58, 95, 0.08), transparent 70%),
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(var(--color-primary-rgb), 0.08), transparent 70%),
       var(--page);
   }
 

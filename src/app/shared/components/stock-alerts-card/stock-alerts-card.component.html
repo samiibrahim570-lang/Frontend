@@ -1,0 +1,86 @@
+<!-- Driven by StockAlertService, so it updates live whenever stock changes anywhere in the app -->
+@if (stock.available()) {
+  <div class="section-head">
+    <h2 class="section-title m-0">Stock alerts</h2>
+    @if (stock.lastUpdated(); as t) {
+      <span class="text-xs text-muted live-dot">Live · updated {{ t | date: 'h:mm a' }}</span>
+    }
+  </div>
+  <div class="card alerts-card" [class.has-alerts]="stock.count() > 0">
+    @if (!stock.loaded()) {
+      <div class="alerts-skeleton"></div>
+    } @else if (stock.count() === 0) {
+      <div class="alerts-ok">
+        <span class="ok-icon"><app-icon name="check" [size]="20"></app-icon></span>
+        <div>
+          <div class="fw-bold">All stock levels are healthy</div>
+          <div class="text-sm text-muted">No item is at or below its reorder level.</div>
+        </div>
+      </div>
+    } @else {
+      <div class="alerts-summary">
+        <div class="flex items-center gap-12">
+          <span class="warn-icon"><app-icon name="alert" [size]="20"></app-icon></span>
+          <div>
+            <div class="fw-bold">{{ stock.count() }} item{{ stock.count() > 1 ? 's need' : ' needs' }} restocking</div>
+            <div class="text-sm text-muted">
+              @if (stock.outOfStockCount()) { <span class="text-danger">{{ stock.outOfStockCount() }} out of stock</span> · }
+              {{ stock.count() - stock.outOfStockCount() }} running low
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-8">
+          @if (auth.canView('PURCHASE')) {
+            <a routerLink="/purchase" class="btn btn-primary btn-sm"><app-icon name="purchase" [size]="14"></app-icon> Restock</a>
+          }
+          @if (auth.canView('ITEM')) {
+            <a routerLink="/masters/item" class="btn btn-outline btn-sm">View items</a>
+          }
+        </div>
+      </div>
+
+      <div class="table-wrap alerts-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="hide-sm">Category</th>
+              <th class="text-right">Available</th>
+              <th class="text-right hide-sm">Reorder level</th>
+              <th class="text-right">Shortfall</th>
+              <th class="hide-sm">Level</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of stock.latest().slice(0, maxAlerts); track a.key) {
+              <tr class="row-low-stock">
+                <td>
+                  <div class="fw-bold">{{ a.itemName }}</div>
+                  <div class="text-xs text-muted">{{ a.itemCode }} · since {{ a.raisedAt | date: 'd MMM, h:mm a' }}</div>
+                </td>
+                <td class="hide-sm">{{ a.categoryName || '—' }}</td>
+                <td class="text-right" [class.text-danger]="a.status === 'out'">
+                  <strong>{{ a.currentStock | number: '1.0-2' }}</strong> <span class="text-muted text-xs">{{ a.unitOfMeasure }}</span>
+                </td>
+                <td class="text-right hide-sm">{{ a.reorderLevel | number: '1.0-2' }}</td>
+                <td class="text-right">{{ a.shortfall | number: '1.0-2' }}</td>
+                <td class="hide-sm level-cell"><div class="stock-bar" [class.out]="a.status === 'out'"><span [style.width.%]="a.stockPercent"></span></div></td>
+                <td>
+                  <span class="badge" [class.badge-danger]="a.status === 'out'" [class.badge-warning]="a.status === 'low'">
+                    {{ a.status === 'out' ? 'Out of stock' : 'Low stock' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (stock.count() > maxAlerts) {
+        <div class="text-sm text-muted mt-12">
+          Showing the {{ maxAlerts }} latest of {{ stock.count() }} alerts — open the notification bell to see all.
+        </div>
+      }
+    }
+  </div>
+}

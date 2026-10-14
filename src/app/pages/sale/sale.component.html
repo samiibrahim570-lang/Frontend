@@ -51,7 +51,7 @@
                 <td>
                   <select formControlName="itemId">
                     <option [ngValue]="null" disabled>Select item</option>
-                    @for (it of items(); track it.id) { <option [ngValue]="it.id">{{ it.itemName }} ({{ it.unitOfMeasure }})</option> }
+                    @for (it of items(); track it.id) { <option [ngValue]="it.id">{{ it.itemName }} ({{ it.unitOfMeasure }}){{ stock.isLow(it.itemCode) ? ' — ⚠ low stock' : '' }}</option> }
                   </select>
                 </td>
                 <td><input type="number" formControlName="quantity" step="0.01" /></td>

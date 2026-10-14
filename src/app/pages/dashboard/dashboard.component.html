@@ -55,12 +55,14 @@
         <div class="stat-label">Items</div>
         <div class="stat-value">{{ s.totalItems }}</div>
       </div>
-      <div class="stat-card" [class.accent-danger]="s.lowStockItemsCount > 0">
+      <div class="stat-card" [class.accent-danger]="lowStockCount(s) > 0">
         <div class="stat-icon"><app-icon name="stockledger" [size]="20"></app-icon></div>
         <div class="stat-label">Low Stock Items</div>
-        <div class="stat-value" [class.text-danger]="s.lowStockItemsCount > 0">{{ s.lowStockItemsCount }}</div>
+        <div class="stat-value" [class.text-danger]="lowStockCount(s) > 0">{{ lowStockCount(s) }}</div>
       </div>
     </div>
+
+    <app-stock-alerts-card></app-stock-alerts-card>
 
     <h2 class="section-title">Quick actions</h2>
     <div class="quick-links">
@@ -70,5 +72,8 @@
       <a routerLink="/gate-pass" class="quick-link"><span class="ql-icon"><app-icon name="gatepass" [size]="18"></app-icon></span> New Gate Pass</a>
       <a routerLink="/reports" class="quick-link"><span class="ql-icon"><app-icon name="reports" [size]="18"></app-icon></span> View Reports</a>
     </div>
+  } @else {
+    <!-- Summary failed to load: still show live stock alerts -->
+    <app-stock-alerts-card></app-stock-alerts-card>
   }
 }
