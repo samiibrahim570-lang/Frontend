@@ -3,7 +3,9 @@
     <h1>User Management</h1>
     <p class="text-muted mb-0">Create staff accounts, assign roles and the companies/branches each user may work in.</p>
   </div>
-  <button class="btn btn-primary" (click)="openCreate()">+ New User</button>
+  @if (auth.canCreate('USERS')) {
+    <button class="btn btn-primary" (click)="openCreate()">+ New User</button>
+  }
 </div>
 
 @if (showForm()) {
@@ -111,9 +113,13 @@
               @else { <span class="badge badge-danger">Inactive</span> }
             </td>
             <td class="text-right">
-              <button class="btn btn-outline btn-sm" (click)="openEdit(u)">Edit</button>
-              <button class="btn btn-outline btn-sm" (click)="resetPassword(u)">Reset Password</button>
-              <button class="btn btn-danger btn-sm" (click)="remove(u)">Delete</button>
+              @if (auth.canEdit('USERS')) {
+                <button class="btn btn-outline btn-sm" (click)="openEdit(u)">Edit</button>
+                <button class="btn btn-outline btn-sm" (click)="resetPassword(u)">Reset Password</button>
+              }
+              @if (auth.canDelete('USERS')) {
+                <button class="btn btn-danger btn-sm" (click)="remove(u)">Delete</button>
+              }
             </td>
           </tr>
         }

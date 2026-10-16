@@ -33,11 +33,16 @@ export class CompanyAdminService {
   }
 }
 
-/** Super Admin: branches (exactly one default per company, enforced by the API). */
+/** Branches (BRANCHES permission; exactly one default per company, enforced by the API). */
 @Injectable({ providedIn: 'root' })
 export class BranchAdminService {
   private baseUrl = `${environment.apiUrl}/Branches`;
   constructor(private http: HttpClient) {}
+
+  /** Companies the logged-in user may manage branches for (all of them for Super Admin). */
+  companies(): Observable<Pick<Company, 'id' | 'name' | 'isActive'>[]> {
+    return this.http.get<ApiResponse<Pick<Company, 'id' | 'name' | 'isActive'>[]>>(`${this.baseUrl}/companies`).pipe(map((r) => r.data));
+  }
 
   getAll(companyId?: number | null): Observable<Branch[]> {
     const params: Record<string, string> = companyId ? { companyId: String(companyId) } : {};

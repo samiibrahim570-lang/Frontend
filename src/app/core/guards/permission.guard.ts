@@ -25,7 +25,7 @@ export function permissionGuard(menuKey: string): CanActivateFn {
   };
 }
 
-/** Company / Branch / User management: Super Admin only (the API enforces the same rule). */
+/** Company management: Super Admin only (the API enforces the same rule). Users/Branches use permissionGuard. */
 export const superAdminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);

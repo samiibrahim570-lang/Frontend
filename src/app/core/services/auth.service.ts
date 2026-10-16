@@ -62,13 +62,10 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  /** Admin and Super Admin bypass menu permissions (same rule as the API). */
-  isAdmin(): boolean {
-    const role = this.currentUser?.roleName?.toLowerCase();
-    return role === 'admin' || this.isSuperAdmin();
-  }
-
-  /** Super Admin manages companies, branches and users and can work in every company. */
+  /**
+   * Super Admin manages companies and can work in every company; it is the only role that bypasses
+   * menu permissions (same rule as the API). Every other role, Admin included, follows the DB matrix.
+   */
   isSuperAdmin(): boolean {
     return !!this.currentUser?.isSuperAdmin || this.currentUser?.roleName?.toLowerCase() === 'super admin';
   }
@@ -80,19 +77,19 @@ export class AuthService {
   }
 
   canView(menuKey: string): boolean {
-    return this.isAdmin() || !!this.findPermission(menuKey)?.canView;
+    return this.isSuperAdmin() || !!this.findPermission(menuKey)?.canView;
   }
   canCreate(menuKey: string): boolean {
-    return this.isAdmin() || !!this.findPermission(menuKey)?.canCreate;
+    return this.isSuperAdmin() || !!this.findPermission(menuKey)?.canCreate;
   }
   canEdit(menuKey: string): boolean {
-    return this.isAdmin() || !!this.findPermission(menuKey)?.canEdit;
+    return this.isSuperAdmin() || !!this.findPermission(menuKey)?.canEdit;
   }
   canDelete(menuKey: string): boolean {
-    return this.isAdmin() || !!this.findPermission(menuKey)?.canDelete;
+    return this.isSuperAdmin() || !!this.findPermission(menuKey)?.canDelete;
   }
   canPrint(menuKey: string): boolean {
-    return this.isAdmin() || !!this.findPermission(menuKey)?.canPrint;
+    return this.isSuperAdmin() || !!this.findPermission(menuKey)?.canPrint;
   }
 
   get visibleMenus(): MenuPermission[] {

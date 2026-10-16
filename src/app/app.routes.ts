@@ -150,7 +150,7 @@ export const routes: Routes = [
       {
         path: 'settings/users',
         loadComponent: () => import('./pages/settings/users/users.component').then(m => m.UsersComponent),
-        canActivate: [superAdminGuard]
+        canActivate: [permissionGuard('USERS')]
       },
       {
         path: 'settings/companies',
@@ -160,7 +160,7 @@ export const routes: Routes = [
       {
         path: 'settings/branches',
         loadComponent: () => import('./pages/settings/branches/branches.component').then(m => m.BranchesComponent),
-        canActivate: [superAdminGuard]
+        canActivate: [permissionGuard('BRANCHES')]
       },
       {
         path: 'settings/roles',

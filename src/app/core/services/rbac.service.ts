@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/common.model';
 import { AppUser, Menu, Role, RoleMenuPermissionRow } from '../models/auth.model';
+import { Branch } from '../models/tenant.model';
 import { CrudService } from './crud.service';
 
 @Injectable({ providedIn: 'root' })
@@ -33,6 +34,16 @@ export class UserService {
 
   getById(id: number): Observable<AppUser> {
     return this.http.get<ApiResponse<AppUser>>(`${this.baseUrl}/${id}`).pipe(map((r) => r.data));
+  }
+
+  /** Roles the logged-in user may give (Super Admin role only for a Super Admin). */
+  assignableRoles(): Observable<Role[]> {
+    return this.http.get<ApiResponse<Role[]>>(`${this.baseUrl}/roles`).pipe(map((r) => r.data));
+  }
+
+  /** Active branches of the companies the logged-in user may assign. */
+  assignableBranches(): Observable<Branch[]> {
+    return this.http.get<ApiResponse<Branch[]>>(`${this.baseUrl}/branches`).pipe(map((r) => r.data));
   }
 
   create(payload: {

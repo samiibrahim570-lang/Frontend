@@ -10,7 +10,9 @@
         <option [value]="c.id" [selected]="c.id === companyFilter()">{{ c.name }}</option>
       }
     </select>
-    <button class="btn btn-primary" (click)="openCreate()">+ New Branch</button>
+    @if (auth.canCreate('BRANCHES')) {
+      <button class="btn btn-primary" (click)="openCreate()">+ New Branch</button>
+    }
   </div>
 </div>
 
@@ -74,15 +76,17 @@
             <td class="text-muted">{{ b.phone || '—' }}</td>
             <td>
               @if (b.isDefault) { <span class="badge badge-success">Default</span> }
-              @else { <button class="btn btn-outline btn-sm" (click)="makeDefault(b)">Make default</button> }
+              @else if (auth.canEdit('BRANCHES')) { <button class="btn btn-outline btn-sm" (click)="makeDefault(b)">Make default</button> }
             </td>
             <td>
               @if (b.isActive) { <span class="badge badge-success">Active</span> }
               @else { <span class="badge badge-danger">Disabled</span> }
             </td>
             <td class="text-right">
-              <button class="btn btn-outline btn-sm" (click)="openEdit(b)">Edit</button>
-              @if (!b.isDefault) {
+              @if (auth.canEdit('BRANCHES')) {
+                <button class="btn btn-outline btn-sm" (click)="openEdit(b)">Edit</button>
+              }
+              @if (!b.isDefault && auth.canDelete('BRANCHES')) {
                 <button class="btn btn-danger btn-sm" (click)="remove(b)">Delete</button>
               }
             </td>

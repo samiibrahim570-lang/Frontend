@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { BranchAdminService, CompanyAdminService } from '../../../core/services/company-admin.service';
+import { BranchAdminService } from '../../../core/services/company-admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { TenantService } from '../../../core/services/tenant.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Branch, Company } from '../../../core/models/tenant.model';
@@ -16,13 +17,13 @@ import { Branch, Company } from '../../../core/models/tenant.model';
 })
 export class BranchesComponent implements OnInit {
   private service = inject(BranchAdminService);
-  private companyService = inject(CompanyAdminService);
   private fb = inject(FormBuilder);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   private tenant = inject(TenantService);
+  auth = inject(AuthService);
 
-  companies = signal<Company[]>([]);
+  companies = signal<Pick<Company, 'id' | 'name' | 'isActive'>[]>([]);
   branches = signal<Branch[]>([]);
   companyFilter = signal<number | null>(null);
   loading = signal(true);
@@ -47,7 +48,7 @@ export class BranchesComponent implements OnInit {
   ngOnInit(): void {
     const qp = Number(this.route.snapshot.queryParamMap.get('companyId'));
     if (qp) this.companyFilter.set(qp);
-    this.companyService.getAll().subscribe((d) => this.companies.set(d));
+    this.service.companies().subscribe((d) => this.companies.set(d));
     this.load();
   }
 

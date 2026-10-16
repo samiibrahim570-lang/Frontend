@@ -1,8 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RoleService, UserService } from '../../../core/services/rbac.service';
-import { BranchAdminService } from '../../../core/services/company-admin.service';
+import { UserService } from '../../../core/services/rbac.service';
 import { AppUser, Role } from '../../../core/models/auth.model';
 import { Branch } from '../../../core/models/tenant.model';
 import { AuthService } from '../../../core/services/auth.service';
@@ -18,8 +17,6 @@ interface CompanyGroup { companyId: number; companyName: string; branches: Branc
 })
 export class UsersComponent implements OnInit {
   private userService = inject(UserService);
-  private roleService = inject(RoleService);
-  private branchService = inject(BranchAdminService);
   private fb = inject(FormBuilder);
   private toast = inject(ToastService);
   auth = inject(AuthService);
@@ -59,8 +56,9 @@ export class UsersComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.roleService.getAll().subscribe((d) => this.roles.set(d));
-    this.branchService.getAll().subscribe((d) => this.branches.set(d));
+    // Only what this user may hand out: no Super Admin role / other companies unless they are Super Admin
+    this.userService.assignableRoles().subscribe((d) => this.roles.set(d));
+    this.userService.assignableBranches().subscribe((d) => this.branches.set(d));
     this.form.get('roleId')!.valueChanges.subscribe((v) => this.selectedRoleId.set(v));
     this.load();
   }
