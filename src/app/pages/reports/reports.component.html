@@ -1,7 +1,7 @@
 <div class="page-header">
   <div>
     <h1>Reports</h1>
-    <p class="text-muted mb-0">Sale, Purchase, Production and Stock reports.</p>
+    <p class="text-muted mb-0">Sale, Purchase, Returns, Production and Stock reports for the selected company / branch.</p>
   </div>
   <div class="flex gap-8">
     <button class="btn btn-outline" (click)="exportCurrentTab()">⬇ Export This Report</button>
@@ -16,6 +16,8 @@
   <div class="flex gap-8 mb-16">
     <button class="btn" [class.btn-primary]="activeTab()==='sale'" [class.btn-outline]="activeTab()!=='sale'" (click)="setTab('sale')">Sale</button>
     <button class="btn" [class.btn-primary]="activeTab()==='purchase'" [class.btn-outline]="activeTab()!=='purchase'" (click)="setTab('purchase')">Purchase</button>
+    <button class="btn" [class.btn-primary]="activeTab()==='salereturn'" [class.btn-outline]="activeTab()!=='salereturn'" (click)="setTab('salereturn')">Sale Return</button>
+    <button class="btn" [class.btn-primary]="activeTab()==='purchasereturn'" [class.btn-outline]="activeTab()!=='purchasereturn'" (click)="setTab('purchasereturn')">Purchase Return</button>
     <button class="btn" [class.btn-primary]="activeTab()==='production'" [class.btn-outline]="activeTab()!=='production'" (click)="setTab('production')">Production / Pisai</button>
     <button class="btn" [class.btn-primary]="activeTab()==='stock'" [class.btn-outline]="activeTab()!=='stock'" (click)="setTab('stock')">Stock</button>
   </div>
@@ -48,7 +50,7 @@
 @if (!loading() && activeTab() === 'sale') {
   <div class="table-wrap mt-16">
     <table>
-      <thead><tr><th>Date</th><th>Invoice No</th><th>Customer</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
+      <thead><tr><th>Date</th><th>Invoice No</th><th>Customer</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th><th class="text-right">Returns</th><th class="text-right">Net After Returns</th></tr></thead>
       <tbody>
         @for (r of saleReport(); track r.invoiceNo) {
           <tr>
@@ -58,13 +60,15 @@
             <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
             <td class="text-right">{{ r.paidAmount | number: '1.0-2' }}</td>
             <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.returnAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.netAfterReturn | number: '1.0-2' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="6" class="empty-state">No data.</td></tr>
+          <tr><td colspan="8" class="empty-state">No data.</td></tr>
         }
       </tbody>
       @if (saleReport().length > 0) {
-        <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>{{ saleTotal() | number: '1.0-2' }}</strong></td><td></td><td></td></tr></tfoot>
+        <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>{{ saleTotal() | number: '1.0-2' }}</strong></td><td></td><td></td><td class="text-right"><strong>{{ saleReturnsTotal() | number: '1.0-2' }}</strong></td><td class="text-right"><strong>{{ saleTotal() - saleReturnsTotal() | number: '1.0-2' }}</strong></td></tr></tfoot>
       }
     </table>
   </div>
@@ -73,7 +77,7 @@
 @if (!loading() && activeTab() === 'purchase') {
   <div class="table-wrap mt-16">
     <table>
-      <thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
+      <thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th><th class="text-right">Returns</th><th class="text-right">Net After Returns</th></tr></thead>
       <tbody>
         @for (r of purchaseReport(); track r.invoiceNo) {
           <tr>
@@ -83,13 +87,55 @@
             <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
             <td class="text-right">{{ r.paidAmount | number: '1.0-2' }}</td>
             <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.returnAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.netAfterReturn | number: '1.0-2' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="6" class="empty-state">No data.</td></tr>
+          <tr><td colspan="8" class="empty-state">No data.</td></tr>
         }
       </tbody>
       @if (purchaseReport().length > 0) {
-        <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>{{ purchaseTotal() | number: '1.0-2' }}</strong></td><td></td><td></td></tr></tfoot>
+        <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>{{ purchaseTotal() | number: '1.0-2' }}</strong></td><td></td><td></td><td class="text-right"><strong>{{ purchaseReturnsTotal() | number: '1.0-2' }}</strong></td><td class="text-right"><strong>{{ purchaseTotal() - purchaseReturnsTotal() | number: '1.0-2' }}</strong></td></tr></tfoot>
+      }
+    </table>
+  </div>
+}
+
+@if (!loading() && (activeTab() === 'salereturn' || activeTab() === 'purchasereturn')) {
+  <div class="table-wrap mt-16">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Return No</th><th>Invoice No</th><th>{{ activeTab() === 'salereturn' ? 'Customer' : 'Supplier' }}</th>
+          <th class="text-right">Total</th><th class="text-right">Deduction</th><th class="text-right">Net Return</th>
+          <th class="text-right">Refund</th><th class="text-right">Balance Adj.</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of returnReport(); track r.returnNo) {
+          <tr>
+            <td>{{ r.returnDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ r.returnNo }}</td>
+            <td>{{ r.invoiceNo }}</td>
+            <td>{{ r.partyName }}</td>
+            <td class="text-right">{{ r.totalAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.deductionAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.refundAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="9" class="empty-state">No data.</td></tr>
+        }
+      </tbody>
+      @if (returnReport().length > 0) {
+        <tfoot><tr>
+          <td colspan="4"><strong>Total</strong></td>
+          <td class="text-right"><strong>{{ returnTotal('totalAmount') | number: '1.0-2' }}</strong></td><td></td>
+          <td class="text-right"><strong>{{ returnTotal('netAmount') | number: '1.0-2' }}</strong></td>
+          <td class="text-right"><strong>{{ returnTotal('refundAmount') | number: '1.0-2' }}</strong></td>
+          <td class="text-right"><strong>{{ returnTotal('balanceAmount') | number: '1.0-2' }}</strong></td>
+        </tr></tfoot>
       }
     </table>
   </div>

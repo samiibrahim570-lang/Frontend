@@ -12,13 +12,7 @@
   @if (gatePass(); as g) {
   <div class="print-page">
     <div class="print-header">
-      <div class="print-company">
-        <div class="mark">FF</div>
-        <div>
-          <h2>Fish Feed Mill</h2>
-          <p>Gate Pass Slip</p>
-        </div>
-      </div>
+      <app-print-letterhead subtitle="Gate Pass Slip"></app-print-letterhead>
       <div class="print-doc-title">
         <h1>GATE PASS</h1>
         <div class="doc-no">{{ g.gatePassNo }}</div>

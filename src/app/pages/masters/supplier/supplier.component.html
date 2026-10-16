@@ -34,7 +34,11 @@
   </div>
 }
 
-<div class="table-wrap mt-16">
+<div class="page-header mt-16 mb-0">
+  <input class="search-input" type="text" placeholder="Filter by code / name / phone…" [value]="filter()" (input)="filter.set($any($event.target).value)" />
+</div>
+
+<div class="table-wrap mt-12">
   @if (loading()) {
     <p class="text-muted p-16">Loading…</p>
   } @else if (suppliers().length === 0) {
@@ -45,7 +49,7 @@
         <tr><th>Code</th><th>Name</th><th>Phone</th><th>City</th><th class="text-right">Balance</th><th class="text-right">Actions</th></tr>
       </thead>
       <tbody>
-        @for (s of suppliers(); track s.id) {
+        @for (s of visible(); track s.id) {
           <tr>
             <td>{{ s.code }}</td>
             <td>{{ s.name }}</td>

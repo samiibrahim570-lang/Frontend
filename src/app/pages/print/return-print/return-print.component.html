@@ -1,0 +1,89 @@
+<div class="print-toolbar no-print">
+  <button class="btn btn-outline btn-sm" (click)="close()">Close</button>
+  <button class="btn btn-primary btn-sm" (click)="print()">
+    <app-icon name="print" [size]="14"></app-icon>
+    Print
+  </button>
+</div>
+
+@if (loading()) {
+  <p class="text-muted p-32">Loading…</p>
+} @else {
+  @if (doc(); as d) {
+  <div class="print-page">
+    <div class="print-header">
+      <app-print-letterhead [subtitle]="cfg.title + ' Note'"></app-print-letterhead>
+      <div class="print-doc-title">
+        <h1>{{ cfg.title.toUpperCase() }}</h1>
+        <div class="doc-no">{{ d.returnNo }}</div>
+        <div class="doc-date">{{ d.returnDate | date: 'dd MMM, yyyy' }}</div>
+        @if (d.status === 'Cancelled') {
+          <div class="text-danger fw-bold mt-4">CANCELLED</div>
+        }
+      </div>
+    </div>
+
+    <div class="print-meta-grid">
+      <div class="print-meta-box">
+        <div class="meta-label">{{ cfg.partyLabel }}</div>
+        <div class="meta-name">{{ d.partyName }}</div>
+        <div class="meta-line">{{ cfg.partyLabel }} ID: {{ d.partyId }}</div>
+      </div>
+      <div class="print-meta-box">
+        <div class="meta-label">Against {{ cfg.invoiceLabel }}</div>
+        <div class="meta-line">Invoice No: {{ d.invoiceNo }}</div>
+        <div class="meta-line">Invoice Date: {{ d.invoiceDate | date: 'dd MMM, yyyy' }}</div>
+        <div class="meta-line">Prepared By: {{ d.createdBy || '—' }}</div>
+      </div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th class="w-32">#</th>
+          <th>Item</th>
+          <th class="text-right w-90">Qty</th>
+          <th class="text-right w-90">Rate</th>
+          <th class="text-right w-100">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of d.items; track line.detailId; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ line.itemName }}</td>
+            <td class="text-right">{{ line.quantity | number: '1.0-3' }} {{ line.unitOfMeasure }}</td>
+            <td class="text-right">{{ line.rate | number: '1.0-2' }}</td>
+            <td class="text-right">{{ line.totalAmount | number: '1.0-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (d.remarks) {
+      <p class="text-xs"><strong>Remarks:</strong> {{ d.remarks }}</p>
+    }
+
+    <div class="print-summary">
+      <div class="row"><span>Return Total</span><span>{{ d.totalAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>Deduction</span><span>-{{ d.deductionAmount | number: '1.0-2' }}</span></div>
+      <div class="row total"><span>Net Return</span><span>{{ d.netAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>{{ cfg.refundLabel }}</span><span>{{ d.refundAmount | number: '1.0-2' }}</span></div>
+      <div class="row"><span>{{ cfg.partyLabel }} balance adjusted</span><span>{{ d.balanceAmount | number: '1.0-2' }}</span></div>
+    </div>
+
+    <div class="print-footer">
+      <div class="print-signature">
+        <div class="line"></div>
+        <div class="label">Prepared By</div>
+      </div>
+      <div class="print-signature">
+        <div class="line"></div>
+        <div class="label">{{ cfg.partyLabel }} Signature</div>
+      </div>
+    </div>
+
+    <p class="print-note">This is a system-generated {{ cfg.title.toLowerCase() }} note.</p>
+  </div>
+  }
+}

@@ -11,12 +11,7 @@
 } @else {
   <div class="print-page">
     <div class="print-header plain">
-      <div class="print-company">
-        <div class="mark">FF</div>
-        <div>
-          <h2>Fish Feed Mill</h2>
-        </div>
-      </div>
+      <app-print-letterhead></app-print-letterhead>
     </div>
 
     <div class="report-title-block">
@@ -30,7 +25,7 @@
 
     @if (kind() === 'sale') {
       <table class="print-table">
-        <thead><tr><th>Date</th><th>Invoice No</th><th>Customer</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
+        <thead><tr><th>Date</th><th>Invoice No</th><th>Customer</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th><th class="text-right">Returns</th></tr></thead>
         <tbody>
           @for (r of saleRows(); track r.invoiceNo) {
             <tr>
@@ -40,18 +35,21 @@
               <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
               <td class="text-right">{{ r.paidAmount | number: '1.0-2' }}</td>
               <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+              <td class="text-right">{{ r.returnAmount | number: '1.0-2' }}</td>
             </tr>
           }
         </tbody>
       </table>
       <div class="print-summary">
-        <div class="row total"><span>Total Net Sales</span><span>{{ saleTotal() | number: '1.0-2' }}</span></div>
+        <div class="row"><span>Total Net Sales</span><span>{{ saleTotal() | number: '1.0-2' }}</span></div>
+        <div class="row"><span>Less: Sale Returns</span><span>-{{ saleReturnsTotal() | number: '1.0-2' }}</span></div>
+        <div class="row total"><span>Net Sales After Returns</span><span>{{ saleTotal() - saleReturnsTotal() | number: '1.0-2' }}</span></div>
       </div>
     }
 
     @if (kind() === 'purchase') {
       <table class="print-table">
-        <thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th></tr></thead>
+        <thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th class="text-right">Net</th><th class="text-right">Paid</th><th class="text-right">Balance</th><th class="text-right">Returns</th></tr></thead>
         <tbody>
           @for (r of purchaseRows(); track r.invoiceNo) {
             <tr>
@@ -61,12 +59,38 @@
               <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
               <td class="text-right">{{ r.paidAmount | number: '1.0-2' }}</td>
               <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+              <td class="text-right">{{ r.returnAmount | number: '1.0-2' }}</td>
             </tr>
           }
         </tbody>
       </table>
       <div class="print-summary">
-        <div class="row total"><span>Total Net Purchases</span><span>{{ purchaseTotal() | number: '1.0-2' }}</span></div>
+        <div class="row"><span>Total Net Purchases</span><span>{{ purchaseTotal() | number: '1.0-2' }}</span></div>
+        <div class="row"><span>Less: Purchase Returns</span><span>-{{ purchaseReturnsTotal() | number: '1.0-2' }}</span></div>
+        <div class="row total"><span>Net Purchases After Returns</span><span>{{ purchaseTotal() - purchaseReturnsTotal() | number: '1.0-2' }}</span></div>
+      </div>
+    }
+
+    @if (kind() === 'salereturn' || kind() === 'purchasereturn') {
+      <table class="print-table">
+        <thead><tr><th>Date</th><th>Return No</th><th>Invoice No</th><th>{{ kind() === 'salereturn' ? 'Customer' : 'Supplier' }}</th><th class="text-right">Net Return</th><th class="text-right">Refund</th><th class="text-right">Balance Adj.</th></tr></thead>
+        <tbody>
+          @for (r of returnRows(); track r.returnNo) {
+            <tr>
+              <td>{{ r.returnDate | date: 'dd-MMM-yyyy' }}</td>
+              <td>{{ r.returnNo }}</td>
+              <td>{{ r.invoiceNo }}</td>
+              <td>{{ r.partyName }}</td>
+              <td class="text-right">{{ r.netAmount | number: '1.0-2' }}</td>
+              <td class="text-right">{{ r.refundAmount | number: '1.0-2' }}</td>
+              <td class="text-right">{{ r.balanceAmount | number: '1.0-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="print-summary">
+        <div class="row"><span>Total Refunds</span><span>{{ returnTotal('refundAmount') | number: '1.0-2' }}</span></div>
+        <div class="row total"><span>Total Net Returns</span><span>{{ returnTotal('netAmount') | number: '1.0-2' }}</span></div>
       </div>
     }
 

@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
@@ -8,6 +8,8 @@ import { MenuPermission } from '../core/models/auth.model';
 import { StockAlertService } from '../core/services/stock-alert.service';
 import { NotificationBellComponent } from '../shared/components/notification-bell/notification-bell.component';
 import { ThemeSwitcherComponent } from '../shared/components/theme-switcher/theme-switcher.component';
+import { GlobalSearchComponent } from '../shared/components/global-search/global-search.component';
+import { TenantService } from '../core/services/tenant.service';
 
 interface DisplayGroup {
   label: string;
@@ -17,14 +19,37 @@ interface DisplayGroup {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, IconComponent, NotificationBellComponent, ThemeSwitcherComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, IconComponent, NotificationBellComponent, ThemeSwitcherComponent, GlobalSearchComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   authService = inject(AuthService);
   stock = inject(StockAlertService);
+  tenant = inject(TenantService);
   private router = inject(Router);
+
+  logoUrl = computed(() => this.tenant.logoUrl(this.tenant.currentCompany()?.logoPath));
+  companyInitials = computed(() => {
+    const name = this.tenant.currentCompany()?.name ?? 'Fish Feed';
+    return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  });
+
+  ngOnInit(): void {
+    // allowed companies/branches for the switcher; warm the letterhead cache used by exports
+    this.tenant.loadContext().subscribe(() => this.tenant.letterhead().subscribe());
+  }
+
+  onCompanyChange(value: string): void {
+    const id = Number(value);
+    if (id && id !== this.tenant.companyId()) this.tenant.switchTo(id); // default branch of that company
+  }
+
+  onBranchChange(value: string): void {
+    const id = Number(value);
+    const companyId = this.tenant.companyId();
+    if (id && companyId && id !== this.tenant.branchId()) this.tenant.switchTo(companyId, id);
+  }
 
   sidebarOpen = true;
   mobileOpen = false;

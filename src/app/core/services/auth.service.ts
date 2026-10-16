@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/common.model';
 import { CurrentUser, LoginRequest, LoginResponse, MenuPermission } from '../models/auth.model';
+import { BRANCH_KEY, COMPANY_KEY } from './tenant.service';
 
 const TOKEN_KEY = 'ffm_token';
 const USER_KEY = 'ffm_user';
@@ -30,6 +31,7 @@ export class AuthService {
             fullName: res.data.fullName,
             userName: res.data.userName,
             roleName: res.data.roleName,
+            isSuperAdmin: res.data.isSuperAdmin,
             permissions: res.data.permissions
           };
           localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -42,6 +44,9 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    // the next user may not have access to this company/branch; the server remembers their own last selection
+    localStorage.removeItem(COMPANY_KEY);
+    localStorage.removeItem(BRANCH_KEY);
     this.currentUserSubject.next(null);
   }
 
@@ -57,8 +62,15 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  /** Admin and Super Admin bypass menu permissions (same rule as the API). */
   isAdmin(): boolean {
-    return this.currentUser?.roleName?.toLowerCase() === 'admin';
+    const role = this.currentUser?.roleName?.toLowerCase();
+    return role === 'admin' || this.isSuperAdmin();
+  }
+
+  /** Super Admin manages companies, branches and users and can work in every company. */
+  isSuperAdmin(): boolean {
+    return !!this.currentUser?.isSuperAdmin || this.currentUser?.roleName?.toLowerCase() === 'super admin';
   }
 
   private findPermission(menuKey: string): MenuPermission | undefined {

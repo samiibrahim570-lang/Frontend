@@ -1,0 +1,45 @@
+<div class="search-box" [class.focused]="open()">
+  <app-icon name="search" [size]="16"></app-icon>
+  <input
+    #input
+    type="search"
+    placeholder="Search pages, customers, products, invoices…"
+    autocomplete="off"
+    aria-label="Global search"
+    (input)="onInput(input.value)"
+    (focus)="open.set(true)"
+    (keydown)="onKey($event)"
+  />
+  <kbd class="shortcut">{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
+</div>
+
+@if (open() && term().trim().length > 0) {
+  <div class="search-panel" role="listbox">
+    @for (g of groups(); track g.type) {
+      <div class="group-label">{{ g.type }}</div>
+      @for (row of g.items; track row.index) {
+        <button
+          type="button"
+          class="hit"
+          role="option"
+          [class.active]="row.index === active()"
+          (mouseenter)="active.set(row.index)"
+          (click)="go(row.hit)"
+        >
+          <app-icon [name]="row.hit.icon" [size]="16"></app-icon>
+          <span class="hit-text">
+            <span class="hit-title">{{ row.hit.title }}</span>
+            @if (row.hit.subtitle) { <span class="hit-sub">{{ row.hit.subtitle }}</span> }
+          </span>
+        </button>
+      }
+    }
+    @if (loading()) {
+      <div class="empty">Searching…</div>
+    } @else if (hits().length === 0) {
+      <div class="empty">
+        @if (term().trim().length < 2) { Type at least 2 characters } @else { No results for “{{ term() }}” }
+      </div>
+    }
+  </div>
+}

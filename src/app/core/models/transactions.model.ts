@@ -172,6 +172,8 @@ export interface SaleReportItem {
   netAmount: number;
   paidAmount: number;
   balanceAmount: number;
+  returnAmount: number;
+  netAfterReturn: number;
 }
 export interface PurchaseReportItem {
   invoiceDate: string;
@@ -179,6 +181,21 @@ export interface PurchaseReportItem {
   supplierName: string;
   netAmount: number;
   paidAmount: number;
+  balanceAmount: number;
+  returnAmount: number;
+  netAfterReturn: number;
+}
+
+/** Sale Return / Purchase Return report row (party = customer or supplier). */
+export interface ReturnReportItem {
+  returnDate: string;
+  returnNo: string;
+  invoiceNo: string;
+  partyName: string;
+  totalAmount: number;
+  deductionAmount: number;
+  netAmount: number;
+  refundAmount: number;
   balanceAmount: number;
 }
 export interface ProductionReportItem {

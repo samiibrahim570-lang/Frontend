@@ -4,14 +4,17 @@ import { ActivatedRoute } from '@angular/router';
 import { PurchaseService } from '../../../core/services/purchase.service';
 import { PurchaseResponse } from '../../../core/models/sale-purchase.model';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { PrintLetterheadComponent } from '../../../shared/components/print-letterhead/print-letterhead.component';
+import { TenantService } from '../../../core/services/tenant.service';
 
 @Component({
   selector: 'app-purchase-invoice-print',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, PrintLetterheadComponent],
   templateUrl: './purchase-invoice-print.component.html'
 })
 export class PurchaseInvoicePrintComponent implements OnInit {
+  private tenant = inject(TenantService);
   private route = inject(ActivatedRoute);
   private purchaseService = inject(PurchaseService);
 
@@ -24,7 +27,7 @@ export class PurchaseInvoicePrintComponent implements OnInit {
       next: (data) => {
         this.invoice.set(data);
         this.loading.set(false);
-        setTimeout(() => window.print(), 400);
+        this.tenant.letterhead().subscribe(() => setTimeout(() => window.print(), 500));
       },
       error: () => this.loading.set(false)
     });

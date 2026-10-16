@@ -4,14 +4,17 @@ import { ActivatedRoute } from '@angular/router';
 import { LedgerService } from '../../../core/services/ledger.service';
 import { LedgerReport } from '../../../core/models/transactions.model';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { PrintLetterheadComponent } from '../../../shared/components/print-letterhead/print-letterhead.component';
+import { TenantService } from '../../../core/services/tenant.service';
 
 @Component({
   selector: 'app-ledger-print',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, PrintLetterheadComponent],
   templateUrl: './ledger-print.component.html'
 })
 export class LedgerPrintComponent implements OnInit {
+  private tenant = inject(TenantService);
   private route = inject(ActivatedRoute);
   private ledgerService = inject(LedgerService);
 
@@ -36,7 +39,7 @@ export class LedgerPrintComponent implements OnInit {
       next: (data) => {
         this.report.set(data);
         this.loading.set(false);
-        setTimeout(() => window.print(), 400);
+        this.tenant.letterhead().subscribe(() => setTimeout(() => window.print(), 500));
       },
       error: () => this.loading.set(false)
     });

@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CategoryService, ItemService } from '../../../core/services/master.service';
 import { Category, Item } from '../../../core/models/master.model';
@@ -23,6 +24,13 @@ export class ItemComponent implements OnInit {
   auth = inject(AuthService);
 
   items = signal<Item[]>([]);
+  private route = inject(ActivatedRoute);
+  /** Quick filter; pre-filled from ?q= when opened from the header search. */
+  filter = signal('');
+  visible = computed(() => {
+    const q = this.filter().trim().toLowerCase();
+    return q ? this.items().filter((x: any) => (x.itemCode ?? '').toString().toLowerCase().includes(q) || (x.itemName ?? '').toString().toLowerCase().includes(q) || (x.categoryName ?? '').toString().toLowerCase().includes(q)) : this.items();
+  });
   categories = signal<Category[]>([]);
   loading = signal(true);
   showForm = signal(false);
@@ -42,6 +50,7 @@ export class ItemComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((p) => this.filter.set(p.get('q') ?? ''));
     this.categoryService.getAll().subscribe((data) => this.categories.set(data));
     this.load();
   }

@@ -46,6 +46,17 @@
   letter-spacing: 0.06em;
   flex-shrink: 0;
 }
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.brand-text { min-width: 0; }
+.brand-title, .brand-sub { overflow: hidden; text-overflow: ellipsis; }
 .brand-title { font-weight: 600; font-size: 15px; white-space: nowrap; line-height: 1.25; }
 .brand-sub { font-size: 12px; color: rgba(255, 255, 255, 0.6); white-space: nowrap; }
 
@@ -139,6 +150,39 @@
 .icon-btn:hover { background: var(--color-hover); color: var(--color-primary); }
 .mobile-only { display: none; }
 .spacer { flex: 1; }
+.topbar-search { flex: 1 1 320px; min-width: 0; }
+.topbar-actions, .user-chip { flex-shrink: 0; }
+
+.tenant-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.tenant-select {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 2px;
+  height: 100%;
+  width: auto;
+  max-width: 180px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  outline: none;
+}
+.tenant-name { font-size: 13px; font-weight: 600; color: var(--color-text); white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.tenant-sep { color: var(--color-border-strong); }
+
 .topbar-actions { display: flex; gap: 4px; padding-right: 12px; border-right: 1px solid var(--color-border); }
 
 .user-chip { display: flex; align-items: center; gap: 12px; }
@@ -167,6 +211,10 @@
 }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+  .user-info, .logout-label { display: none; }
+  .tenant-select, .tenant-name { max-width: 130px; }
+}
 @media (max-width: 900px) {
   .mobile-only { display: flex; }
   .sidebar,
@@ -190,4 +238,11 @@
   .user-info { display: none; }
   .topbar { gap: 8px; }
   .topbar-actions { padding: 0; border: 0; }
+  .tenant-switcher { padding: 0 6px; }
+  .tenant-switcher app-icon, .tenant-sep { display: none; }
+  .tenant-select, .tenant-name { max-width: 96px; }
+}
+@media (max-width: 600px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; }
+  .topbar-search { order: 10; flex-basis: 100%; max-width: none; }
 }

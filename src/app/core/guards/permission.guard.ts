@@ -24,3 +24,16 @@ export function permissionGuard(menuKey: string): CanActivateFn {
     return false;
   };
 }
+
+/** Company / Branch / User management: Super Admin only (the API enforces the same rule). */
+export const superAdminGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  if (!authService.isLoggedIn()) {
+    router.navigate(['/login']);
+    return false;
+  }
+  if (authService.isSuperAdmin()) return true;
+  router.navigate(['/dashboard']);
+  return false;
+};

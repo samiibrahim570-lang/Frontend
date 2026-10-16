@@ -12,13 +12,7 @@
   @if (record(); as p) {
     <div class="print-page">
       <div class="print-header">
-        <div class="print-company">
-          <div class="mark">FF</div>
-          <div>
-            <h2>Fish Feed Mill</h2>
-            <p>Production / Pisai Slip</p>
-          </div>
-        </div>
+        <app-print-letterhead subtitle="Production / Pisai Slip"></app-print-letterhead>
         <div class="print-doc-title">
           <h1>PRODUCTION SLIP</h1>
           <div class="doc-no">{{ p.productionNo }}</div>

@@ -1,8 +1,33 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
+import { TenantService } from './tenant.service';
 
 @Injectable({ providedIn: 'root' })
 export class ExportService {
+  private tenant = inject(TenantService);
+
+  /** Company / branch lines written above the data on every exported sheet. */
+  private headerRows(title: string): string[][] {
+    const l = this.tenant.currentLetterhead();
+    const company = l?.companyName ?? this.tenant.currentCompany()?.name ?? '';
+    const branch = l?.branchName ?? this.tenant.currentBranch()?.name ?? '';
+    const contact = [l?.address, l?.phone ? `Phone: ${l.phone}` : null, l?.email, l?.ntnNo ? `NTN: ${l.ntnNo}` : null]
+      .filter(Boolean).join('  |  ');
+    return [
+      [company],
+      [`Branch: ${branch}`],
+      [contact],
+      [`${title}  -  Generated ${new Date().toLocaleString()}`],
+      []
+    ];
+  }
+
+  private sheetWithHeader(data: any[], title: string): XLSX.WorkSheet {
+    const header = this.headerRows(title);
+    const worksheet = XLSX.utils.aoa_to_sheet(header);
+    XLSX.utils.sheet_add_json(worksheet, data, { origin: header.length });
+    return worksheet;
+  }
   /**
    * Exports an array of flat objects to a downloadable .xlsx file.
    * @param data     Array of plain objects - object keys become column headers.
@@ -14,7 +39,7 @@ export class ExportService {
       window.alert('No data to export.');
       return;
     }
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = this.sheetWithHeader(data, sheetName);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName.substring(0, 31));
     XLSX.writeFile(workbook, `${fileName}.xlsx`);
@@ -32,7 +57,7 @@ export class ExportService {
     }
     const workbook = XLSX.utils.book_new();
     for (const sheet of nonEmpty) {
-      const worksheet = XLSX.utils.json_to_sheet(sheet.data);
+      const worksheet = this.sheetWithHeader(sheet.data, sheet.name);
       XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name.substring(0, 31));
     }
     XLSX.writeFile(workbook, `${fileName}.xlsx`);

@@ -12,14 +12,7 @@
   @if (invoice(); as inv) {
   <div class="print-page">
     <div class="print-header">
-      <div class="print-company">
-        <div class="mark">FF</div>
-        <div>
-          <h2>Fish Feed Mill</h2>
-          <p>Production &amp; Trading of Fish Feed</p>
-          <p>Phone: 0300-0000000 &nbsp;|&nbsp; Address: Industrial Area, City</p>
-        </div>
-      </div>
+      <app-print-letterhead></app-print-letterhead>
       <div class="print-doc-title">
         <h1>SALE INVOICE</h1>
         <div class="doc-no">{{ inv.invoiceNo }}</div>

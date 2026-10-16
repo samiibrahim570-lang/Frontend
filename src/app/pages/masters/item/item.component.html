@@ -76,7 +76,11 @@
   </div>
 }
 
-<div class="table-wrap mt-16">
+<div class="page-header mt-16 mb-0">
+  <input class="search-input" type="text" placeholder="Filter by code / name / category…" [value]="filter()" (input)="filter.set($any($event.target).value)" />
+</div>
+
+<div class="table-wrap mt-12">
   @if (loading()) {
     <p class="text-muted p-16">Loading…</p>
   } @else if (items().length === 0) {
@@ -96,7 +100,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (i of items(); track i.id) {
+        @for (i of visible(); track i.id) {
           <tr [class.row-low-stock]="isLow(i)">
             <td>{{ i.itemCode }}</td>
             <td>{{ i.itemName }}</td>

@@ -1,0 +1,115 @@
+<div class="page-header">
+  <div>
+    <h1>Companies</h1>
+    <p class="text-muted mb-0">Company details and logo printed on every invoice and report. Super Admin only.</p>
+  </div>
+  <button class="btn btn-primary" (click)="openCreate()">+ New Company</button>
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>{{ editingId() ? 'Edit Company' : 'New Company' }}</h3>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Company Name *</label>
+          <input type="text" formControlName="name" />
+          @if (form.get('name')?.touched && form.get('name')?.invalid) { <small class="text-danger">Company name is required.</small> }
+        </div>
+        <div class="form-group">
+          <label>Tagline</label>
+          <input type="text" formControlName="tagline" placeholder="e.g. Production & Trading of Fish Feed" />
+        </div>
+        @if (!editingId()) {
+          <div class="form-group">
+            <label>First (default) branch</label>
+            <input type="text" formControlName="defaultBranchName" placeholder="Main" />
+          </div>
+        }
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input type="tel" formControlName="phone" /></div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" />
+          @if (form.get('email')?.touched && form.get('email')?.invalid) { <small class="text-danger">Enter a valid email.</small> }
+        </div>
+        <div class="form-group"><label>Website</label><input type="text" formControlName="website" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>NTN / Tax No</label><input type="text" formControlName="ntnNo" /></div>
+        <div class="form-group"><label>STRN</label><input type="text" formControlName="strnNo" /></div>
+        <div class="form-group">
+          <label class="flex items-center gap-8 mt-8">
+            <input class="w-auto" type="checkbox" formControlName="isActive" /> Active
+          </label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Address</label>
+          <textarea rows="2" formControlName="address"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Logo (PNG/JPG/WEBP, max 2 MB)</label>
+          <div class="flex items-center gap-8">
+            @if (logoPreview()) {
+              <img [src]="logoPreview()" alt="Logo preview" style="width:56px;height:56px;object-fit:contain;border:1px solid var(--color-border);border-radius:8px;background:#fff" />
+            }
+            <input #logoInput type="file" accept="image/png,image/jpeg,image/webp,image/gif" (change)="onLogoSelected(logoInput)" />
+            @if (logoPreview() && editingId()) {
+              <button type="button" class="btn btn-outline btn-sm" (click)="removeLogo()">Remove</button>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-8">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="table-wrap mt-16">
+  @if (loading()) {
+    <p class="text-muted p-16">Loading…</p>
+  } @else {
+    <table>
+      <thead>
+        <tr><th>Logo</th><th>Company</th><th>Contact</th><th>NTN</th><th>Branches</th><th>Status</th><th class="text-right">Actions</th></tr>
+      </thead>
+      <tbody>
+        @for (c of companies(); track c.id) {
+          <tr>
+            <td>
+              @if (c.logoPath) {
+                <img [src]="tenant.logoUrl(c.logoPath)" [alt]="c.name" style="width:36px;height:36px;object-fit:contain" />
+              } @else { <span class="text-muted">—</span> }
+            </td>
+            <td>
+              <div class="fw-bold">{{ c.name }}</div>
+              @if (c.tagline) { <div class="text-muted text-xs">{{ c.tagline }}</div> }
+            </td>
+            <td class="text-muted">{{ c.phone || '—' }}@if (c.email) { <br />{{ c.email }} }</td>
+            <td>{{ c.ntnNo || '—' }}</td>
+            <td>{{ c.branchCount }} @if (c.defaultBranchName) { <span class="text-muted">(default: {{ c.defaultBranchName }})</span> }</td>
+            <td>
+              @if (c.isActive) { <span class="badge badge-success">Active</span> }
+              @else { <span class="badge badge-danger">Disabled</span> }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" (click)="manageBranches(c)">Branches</button>
+              <button class="btn btn-outline btn-sm" (click)="openEdit(c)">Edit</button>
+              <button class="btn btn-sm" [class.btn-danger]="c.isActive" [class.btn-outline]="!c.isActive" (click)="toggle(c)">
+                {{ c.isActive ? 'Disable' : 'Enable' }}
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="text-muted p-16">No companies yet.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

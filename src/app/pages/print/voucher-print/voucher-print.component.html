@@ -12,13 +12,7 @@
   @if (voucher(); as v) {
     <div class="print-page narrow">
       <div class="print-header">
-        <div class="print-company">
-          <div class="mark">FF</div>
-          <div>
-            <h2>Fish Feed Mill</h2>
-            <p>{{ v.voucherType === 'Receipt' ? 'Cash/Bank Receipt' : v.voucherType === 'Payment' ? 'Payment Voucher' : 'Journal Voucher' }}</p>
-          </div>
-        </div>
+        <app-print-letterhead [subtitle]="v.voucherType === 'Receipt' ? 'Cash/Bank Receipt' : v.voucherType === 'Payment' ? 'Payment Voucher' : 'Journal Voucher'"></app-print-letterhead>
         <div class="print-doc-title">
           <h1>{{ v.voucherType === 'Receipt' ? 'RECEIPT' : v.voucherType === 'Payment' ? 'PAYMENT' : 'JOURNAL' }}</h1>
           <div class="doc-no">{{ v.voucherNo }}</div>

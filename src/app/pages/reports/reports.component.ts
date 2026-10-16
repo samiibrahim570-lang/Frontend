@@ -20,6 +20,7 @@ import {
 import {
   ProductionReportItem,
   PurchaseReportItem,
+  ReturnReportItem,
   SaleReportItem,
   StockReportItem
 } from '../../core/models/transactions.model';
@@ -27,7 +28,7 @@ import { defaultPagedRequest } from '../../core/models/common.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 
-type ReportTab = 'sale' | 'purchase' | 'production' | 'stock';
+type ReportTab = 'sale' | 'purchase' | 'salereturn' | 'purchasereturn' | 'production' | 'stock';
 
 @Component({
   selector: 'app-reports',
@@ -64,6 +65,7 @@ export class ReportsComponent {
   purchaseReport = signal<PurchaseReportItem[]>([]);
   productionReport = signal<ProductionReportItem[]>([]);
   stockReport = signal<StockReportItem[]>([]);
+  returnReport = signal<ReturnReportItem[]>([]);
 
   setTab(tab: ReportTab): void {
     this.activeTab.set(tab);
@@ -82,6 +84,11 @@ export class ReportsComponent {
     } else if (tab === 'purchase') {
       this.reportService.getPurchaseReport(this.fromDate, this.toDate).subscribe({
         next: (d) => { this.purchaseReport.set(d); this.loading.set(false); },
+        error: () => this.loading.set(false)
+      });
+    } else if (tab === 'salereturn' || tab === 'purchasereturn') {
+      this.reportService.getReturnReport(tab === 'salereturn' ? 'sale' : 'purchase', this.fromDate, this.toDate).subscribe({
+        next: (d) => { this.returnReport.set(d); this.loading.set(false); },
         error: () => this.loading.set(false)
       });
     } else if (tab === 'production') {
@@ -116,6 +123,15 @@ export class ReportsComponent {
   purchaseTotal(): number {
     return this.purchaseReport().reduce((sum, r) => sum + r.netAmount, 0);
   }
+  saleReturnsTotal(): number {
+    return this.saleReport().reduce((sum, r) => sum + (r.returnAmount || 0), 0);
+  }
+  purchaseReturnsTotal(): number {
+    return this.purchaseReport().reduce((sum, r) => sum + (r.returnAmount || 0), 0);
+  }
+  returnTotal(field: 'totalAmount' | 'netAmount' | 'refundAmount' | 'balanceAmount'): number {
+    return this.returnReport().reduce((sum, r) => sum + r[field], 0);
+  }
 
   // Export just the currently active report tab
   exportCurrentTab(): void {
@@ -126,7 +142,8 @@ export class ReportsComponent {
       this.exportService.exportToExcel(
         this.saleReport().map((r) => ({
           Date: r.invoiceDate, 'Invoice No': r.invoiceNo, Customer: r.customerName,
-          'Net Amount': r.netAmount, Paid: r.paidAmount, Balance: r.balanceAmount
+          'Net Amount': r.netAmount, Paid: r.paidAmount, Balance: r.balanceAmount,
+          Returns: r.returnAmount, 'Net After Returns': r.netAfterReturn
         })),
         `Sale-Report-${stamp}`, 'Sale Report'
       );
@@ -134,9 +151,19 @@ export class ReportsComponent {
       this.exportService.exportToExcel(
         this.purchaseReport().map((r) => ({
           Date: r.invoiceDate, 'Invoice No': r.invoiceNo, Supplier: r.supplierName,
-          'Net Amount': r.netAmount, Paid: r.paidAmount, Balance: r.balanceAmount
+          'Net Amount': r.netAmount, Paid: r.paidAmount, Balance: r.balanceAmount,
+          Returns: r.returnAmount, 'Net After Returns': r.netAfterReturn
         })),
         `Purchase-Report-${stamp}`, 'Purchase Report'
+      );
+    } else if (tab === 'salereturn' || tab === 'purchasereturn') {
+      const isSale = tab === 'salereturn';
+      this.exportService.exportToExcel(
+        this.returnReport().map((r) => ({
+          Date: r.returnDate, 'Return No': r.returnNo, 'Invoice No': r.invoiceNo, [isSale ? 'Customer' : 'Supplier']: r.partyName,
+          Total: r.totalAmount, Deduction: r.deductionAmount, 'Net Return': r.netAmount, Refund: r.refundAmount, 'Balance Adj.': r.balanceAmount
+        })),
+        `${isSale ? 'Sale' : 'Purchase'}-Return-Report-${stamp}`, `${isSale ? 'Sale' : 'Purchase'} Return Report`
       );
     } else if (tab === 'production') {
       this.exportService.exportToExcel(

@@ -13,10 +13,10 @@ export interface MenuGroupConfig {
 export const MENU_GROUPS: MenuGroupConfig[] = [
   { label: 'Overview', icon: 'dashboard', keys: ['DASHBOARD'] },
   { label: 'Masters', icon: 'category', keys: ['CATEGORY', 'ITEM', 'CUSTOMER', 'SUPPLIER', 'BOOKER'] },
-  { label: 'Transactions', icon: 'sale', keys: ['SALE', 'PURCHASE', 'PRODUCTION', 'VOUCHER', 'GATEPASS'] },
+  { label: 'Transactions', icon: 'sale', keys: ['SALE', 'SALERETURN', 'PURCHASE', 'PURCHASERETURN', 'PRODUCTION', 'VOUCHER', 'GATEPASS'] },
   { label: 'Accounts', icon: 'ledger', keys: ['LEDGER', 'STOCKLEDGER'] },
   { label: 'Reports', icon: 'reports', keys: ['REPORTS'] },
-  { label: 'Administration', icon: 'roles', keys: ['USERS', 'ROLES'] }
+  { label: 'Administration', icon: 'roles', keys: ['COMPANIES', 'BRANCHES', 'USERS', 'ROLES'] }
 ];
 
 // Maps a MenuKey to an icon name used by <app-icon>
@@ -36,5 +36,9 @@ export const MENU_ICON_MAP: Record<string, string> = {
   GATEPASS: 'gatepass',
   REPORTS: 'reports',
   USERS: 'users',
-  ROLES: 'roles'
+  ROLES: 'roles',
+  SALERETURN: 'salereturn',
+  PURCHASERETURN: 'purchasereturn',
+  COMPANIES: 'company',
+  BRANCHES: 'branch'
 };

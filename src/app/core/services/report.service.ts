@@ -8,6 +8,7 @@ import {
   DashboardSummary,
   ProductionReportItem,
   PurchaseReportItem,
+  ReturnReportItem,
   SaleReportItem,
   StockReportItem
 } from '../models/transactions.model';
@@ -32,6 +33,15 @@ export class ReportService {
     if (to) params = params.set('to', to);
     if (supplierId) params = params.set('supplierId', supplierId);
     return this.http.get<ApiResponse<PurchaseReportItem[]>>(`${this.baseUrl}/purchase`, { params }).pipe(map((r) => r.data));
+  }
+
+  getReturnReport(kind: 'sale' | 'purchase', from?: string | null, to?: string | null): Observable<ReturnReportItem[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http
+      .get<ApiResponse<ReturnReportItem[]>>(`${this.baseUrl}/${kind}-return`, { params })
+      .pipe(map((r) => r.data));
   }
 
   getProductionReport(from?: string | null, to?: string | null): Observable<ProductionReportItem[]> {

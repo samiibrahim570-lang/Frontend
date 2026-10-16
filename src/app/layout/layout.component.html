@@ -2,12 +2,16 @@
   <div class="sidebar-backdrop" (click)="closeMobile()"></div>
 
   <aside class="sidebar" [class.collapsed]="!sidebarOpen">
-    <div class="sidebar-brand">
-      <div class="brand-mark">FF</div>
+    <div class="sidebar-brand" [title]="(tenant.currentCompany()?.name || '') + ' · ' + (tenant.currentBranch()?.name || '')">
+      @if (logoUrl()) {
+        <img class="brand-logo" [src]="logoUrl()" [alt]="tenant.currentCompany()?.name" />
+      } @else {
+        <div class="brand-mark">{{ companyInitials() }}</div>
+      }
       @if (sidebarOpen) {
         <div class="brand-text">
-          <div class="brand-title">Fish Feed Mill</div>
-          <div class="brand-sub">Business Suite</div>
+          <div class="brand-title">{{ tenant.currentCompany()?.name || 'Fish Feed Mill' }}</div>
+          <div class="brand-sub">{{ tenant.currentBranch()?.name ? tenant.currentBranch()!.name + ' branch' : 'Business Suite' }}</div>
         </div>
       }
     </div>
@@ -52,7 +56,35 @@
       <button class="icon-btn mobile-only" (click)="toggleMobile()" aria-label="Toggle menu">
         <app-icon name="menu" [size]="20"></app-icon>
       </button>
+      <app-global-search class="topbar-search"></app-global-search>
       <div class="spacer"></div>
+
+      @if (tenant.companies().length > 0) {
+        <div class="tenant-switcher" title="Switch company / branch">
+          <app-icon name="company" [size]="16"></app-icon>
+          @if (tenant.companies().length > 1) {
+            <select class="tenant-select" aria-label="Company" [value]="tenant.companyId()" (change)="onCompanyChange($any($event.target).value)">
+              @for (c of tenant.companies(); track c.id) {
+                <option [value]="c.id" [selected]="c.id === tenant.companyId()">{{ c.name }}</option>
+              }
+            </select>
+          } @else {
+            <span class="tenant-name">{{ tenant.currentCompany()?.name }}</span>
+          }
+          <span class="tenant-sep">/</span>
+          <app-icon name="branch" [size]="16"></app-icon>
+          @if (tenant.branches().length > 1) {
+            <select class="tenant-select" aria-label="Branch" [value]="tenant.branchId()" (change)="onBranchChange($any($event.target).value)">
+              @for (b of tenant.branches(); track b.id) {
+                <option [value]="b.id" [selected]="b.id === tenant.branchId()">{{ b.name }}{{ b.isDefault ? ' (default)' : '' }}</option>
+              }
+            </select>
+          } @else {
+            <span class="tenant-name">{{ tenant.currentBranch()?.name }}</span>
+          }
+        </div>
+      }
+
       <div class="topbar-actions">
         <app-theme-switcher></app-theme-switcher>
         <app-notification-bell></app-notification-bell>

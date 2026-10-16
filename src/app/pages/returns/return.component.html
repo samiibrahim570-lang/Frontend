@@ -1,0 +1,190 @@
+<div class="page-header">
+  <div>
+    <h1>{{ cfg.title }}</h1>
+    <p class="text-muted mb-0">{{ cfg.stockNote }}</p>
+  </div>
+  @if (auth.canCreate(cfg.menuKey)) {
+    <button class="btn btn-primary" (click)="openCreate()">+ New {{ cfg.title }}</button>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="card">
+    <h3>New {{ cfg.title }}</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Return No (leave blank to auto-generate)</label>
+        <input type="text" [(ngModel)]="returnNo" placeholder="Auto" />
+      </div>
+      <div class="form-group">
+        <label>Return Date *</label>
+        <input type="date" [(ngModel)]="returnDate" />
+      </div>
+      <div class="form-group">
+        <label>{{ cfg.partyLabel }} *</label>
+        <select [(ngModel)]="partyId" (ngModelChange)="onPartyChange()">
+          <option [ngValue]="null" disabled>Select {{ cfg.partyLabel.toLowerCase() }}</option>
+          @for (p of parties(); track p.id) { <option [ngValue]="p.id">{{ p.name }} ({{ p.code }})</option> }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Original {{ cfg.invoiceLabel }} *</label>
+        <select [(ngModel)]="invoiceId" (ngModelChange)="onInvoiceChange()" [disabled]="!partyId">
+          <option [ngValue]="null" disabled>{{ partyId ? 'Select invoice' : 'Select ' + cfg.partyLabel.toLowerCase() + ' first' }}</option>
+          @for (i of invoices(); track i.id) {
+            <option [ngValue]="i.id">{{ i.invoiceNo }} · {{ i.invoiceDate | date: 'dd-MMM-yyyy' }} · {{ i.netAmount | number: '1.0-0' }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (returnable(); as r) {
+      <div class="flex justify-between items-center mt-20">
+        <h3 class="mb-0">Items on {{ r.invoiceNo }}</h3>
+        <button type="button" class="btn btn-outline btn-sm" (click)="returnAll()">Return all remaining</button>
+      </div>
+      <div class="table-wrap mt-12">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="text-right">Invoiced</th>
+              <th class="text-right">Already Returned</th>
+              <th class="text-right">Returnable</th>
+              <th class="text-right">Rate</th>
+              <th class="w-110">Return Qty</th>
+              <th class="text-right w-110">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of r.lines; track l.detailId) {
+              <tr>
+                <td>{{ l.itemName }} <span class="text-muted">({{ l.unitOfMeasure }})</span></td>
+                <td class="text-right">{{ l.invoicedQty | number: '1.0-3' }}</td>
+                <td class="text-right">{{ l.returnedQty | number: '1.0-3' }}</td>
+                <td class="text-right fw-bold">{{ l.returnableQty | number: '1.0-3' }}</td>
+                <td class="text-right">{{ l.rate | number: '1.0-2' }}</td>
+                <td>
+                  <input type="number" min="0" [max]="l.returnableQty" step="0.01"
+                    [disabled]="l.returnableQty <= 0"
+                    [ngModel]="qty()[l.detailId] || 0"
+                    (ngModelChange)="setQty(l.detailId, $event, l.returnableQty)" />
+                </td>
+                <td class="text-right">{{ lineTotal(l.detailId, l.rate) | number: '1.0-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-row mt-20">
+        <div class="form-group">
+          <label>Deduction (damage / restocking)</label>
+          <input type="number" min="0" step="0.01" [(ngModel)]="deductionAmount" />
+        </div>
+        <div class="form-group">
+          <label>{{ cfg.refundLabel }}</label>
+          <input type="number" min="0" step="0.01" [(ngModel)]="refundAmount" />
+        </div>
+        <div class="form-group">
+          <label>Remarks</label>
+          <input type="text" [(ngModel)]="remarks" />
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <div class="flex justify-between"><span>Return Total</span><strong>{{ totalAmount() | number: '1.0-2' }}</strong></div>
+        <div class="flex justify-between"><span>Net Return (after deduction)</span><strong>{{ netAmount() | number: '1.0-2' }}</strong></div>
+        <div class="flex justify-between"><span>{{ cfg.partyLabel }} balance reduced by</span><strong>{{ balanceAmount() | number: '1.0-2' }}</strong></div>
+      </div>
+    }
+
+    <div class="flex gap-8 mt-16">
+      <button type="button" class="btn btn-primary" [disabled]="saving() || !returnable()" (click)="save()">{{ saving() ? 'Saving…' : 'Save Return' }}</button>
+      <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+}
+
+@if (viewing(); as d) {
+  <div class="card">
+    <div class="page-header">
+      <div>
+        <h3>{{ cfg.title }} {{ d.returnNo }}</h3>
+        <p class="text-muted mb-0">{{ d.partyName }} · {{ d.returnDate | date: 'dd-MMM-yyyy' }} · against {{ d.invoiceNo }}</p>
+      </div>
+      <div class="flex gap-8">
+        @if (auth.canPrint(cfg.menuKey)) {
+          <button class="btn btn-outline btn-sm" (click)="print(d)">🖨 Print</button>
+        }
+        @if (auth.canDelete(cfg.menuKey) && d.status !== 'Cancelled') {
+          <button class="btn btn-danger btn-sm" (click)="cancelReturn(d)">Cancel Return</button>
+        }
+        <button class="btn btn-outline btn-sm" (click)="closeView()">Close</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Amount</th></tr></thead>
+        <tbody>
+          @for (line of d.items; track line.detailId) {
+            <tr>
+              <td>{{ line.itemName }}</td>
+              <td class="text-right">{{ line.quantity | number: '1.0-3' }} {{ line.unitOfMeasure }}</td>
+              <td class="text-right">{{ line.rate | number: '1.0-2' }}</td>
+              <td class="text-right">{{ line.totalAmount | number: '1.0-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="totals-box mt-12">
+      <div class="flex justify-between"><span class="text-muted">Return Total</span><strong>{{ d.totalAmount | number: '1.0-2' }}</strong></div>
+      <div class="flex justify-between"><span class="text-muted">Deduction</span><strong>{{ d.deductionAmount | number: '1.0-2' }}</strong></div>
+      <div class="flex justify-between"><span class="text-muted">Net Return</span><strong>{{ d.netAmount | number: '1.0-2' }}</strong></div>
+      <div class="flex justify-between"><span class="text-muted">Refund</span><strong>{{ d.refundAmount | number: '1.0-2' }}</strong></div>
+      <div class="flex justify-between"><span class="text-muted">Balance Adjusted</span><strong>{{ d.balanceAmount | number: '1.0-2' }}</strong></div>
+    </div>
+  </div>
+}
+
+<div class="page-header mt-20">
+  <input class="search-input" type="text" placeholder="Search return no / invoice no / {{ cfg.partyLabel.toLowerCase() }}…" (change)="search($any($event.target).value)" />
+  <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+</div>
+
+<div class="table-wrap">
+  @if (loading()) {
+    <p class="text-muted p-16">Loading…</p>
+  } @else if (docs().length === 0) {
+    <div class="empty-state">No {{ cfg.title.toLowerCase() }}s yet.</div>
+  } @else {
+    <table>
+      <thead>
+        <tr><th>Return No</th><th>Date</th><th>{{ cfg.partyLabel }}</th><th>Invoice No</th><th class="text-right">Net Return</th><th class="text-right">Refund</th><th>Status</th><th class="text-right">Actions</th></tr>
+      </thead>
+      <tbody>
+        @for (d of docs(); track d.id) {
+          <tr>
+            <td>{{ d.returnNo }}</td>
+            <td>{{ d.returnDate | date: 'dd-MMM-yyyy' }}</td>
+            <td>{{ d.partyName }}</td>
+            <td>{{ d.invoiceNo }}</td>
+            <td class="text-right">{{ d.netAmount | number: '1.0-2' }}</td>
+            <td class="text-right">{{ d.refundAmount | number: '1.0-2' }}</td>
+            <td>
+              @if (d.status === 'Cancelled') { <span class="badge badge-danger">Cancelled</span> }
+              @else { <span class="badge badge-success">Confirmed</span> }
+            </td>
+            <td class="text-right">
+              <button class="btn btn-outline btn-sm" (click)="view(d)">View</button>
+              @if (auth.canPrint(cfg.menuKey)) {
+                <button class="btn btn-outline btn-sm" (click)="print(d)">Print</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

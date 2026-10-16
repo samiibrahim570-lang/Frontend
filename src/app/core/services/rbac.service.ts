@@ -42,6 +42,7 @@ export class UserService {
     phone?: string | null;
     password: string;
     roleId: number;
+    branchIds: number[];
   }): Observable<{ id: number; userName: string }> {
     return this.http
       .post<ApiResponse<{ id: number; userName: string }>>(this.baseUrl, payload)
@@ -50,7 +51,7 @@ export class UserService {
 
   update(
     id: number,
-    payload: { fullName: string; email?: string | null; phone?: string | null; roleId: number; isActive: boolean }
+    payload: { fullName: string; email?: string | null; phone?: string | null; roleId: number; isActive: boolean; branchIds?: number[] }
   ): Observable<void> {
     return this.http.put<ApiResponse<void>>(`${this.baseUrl}/${id}`, payload).pipe(map(() => void 0));
   }
@@ -58,6 +59,13 @@ export class UserService {
   changePassword(id: number, oldPassword: string, newPassword: string): Observable<void> {
     return this.http
       .post<ApiResponse<void>>(`${this.baseUrl}/${id}/change-password`, { oldPassword, newPassword })
+      .pipe(map(() => void 0));
+  }
+
+  /** Super Admin sets a new password without the old one. */
+  resetPassword(id: number, newPassword: string): Observable<void> {
+    return this.http
+      .post<ApiResponse<void>>(`${this.baseUrl}/${id}/reset-password`, { newPassword })
       .pipe(map(() => void 0));
   }
 

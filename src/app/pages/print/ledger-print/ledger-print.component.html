@@ -12,13 +12,7 @@
   @if (report(); as r) {
   <div class="print-page">
     <div class="print-header">
-      <div class="print-company">
-        <div class="mark">FF</div>
-        <div>
-          <h2>Fish Feed Mill</h2>
-          <p>{{ partyType() === 'customer' ? 'Customer' : 'Supplier' }} Account Statement</p>
-        </div>
-      </div>
+      <app-print-letterhead [subtitle]="(partyType() === 'customer' ? 'Customer' : 'Supplier') + ' Account Statement'"></app-print-letterhead>
       <div class="print-doc-title">
         <h1>LEDGER STATEMENT</h1>
         @if (fromDate || toDate) {

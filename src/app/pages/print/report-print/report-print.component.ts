@@ -5,20 +5,24 @@ import { ReportService } from '../../../core/services/report.service';
 import {
   ProductionReportItem,
   PurchaseReportItem,
+  ReturnReportItem,
   SaleReportItem,
   StockReportItem
 } from '../../../core/models/transactions.model';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { PrintLetterheadComponent } from '../../../shared/components/print-letterhead/print-letterhead.component';
+import { TenantService } from '../../../core/services/tenant.service';
 
-type ReportKind = 'sale' | 'purchase' | 'production' | 'stock';
+type ReportKind = 'sale' | 'purchase' | 'salereturn' | 'purchasereturn' | 'production' | 'stock';
 
 @Component({
   selector: 'app-report-print',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, PrintLetterheadComponent],
   templateUrl: './report-print.component.html'
 })
 export class ReportPrintComponent implements OnInit {
+  private tenant = inject(TenantService);
   private route = inject(ActivatedRoute);
   private reportService = inject(ReportService);
 
@@ -31,6 +35,7 @@ export class ReportPrintComponent implements OnInit {
   purchaseRows = signal<PurchaseReportItem[]>([]);
   productionRows = signal<ProductionReportItem[]>([]);
   stockRows = signal<StockReportItem[]>([]);
+  returnRows = signal<ReturnReportItem[]>([]);
 
   ngOnInit(): void {
     const kind = (this.route.snapshot.paramMap.get('type') || 'sale') as ReportKind;
@@ -40,13 +45,16 @@ export class ReportPrintComponent implements OnInit {
 
     const done = () => {
       this.loading.set(false);
-      setTimeout(() => window.print(), 400);
+      this.tenant.letterhead().subscribe(() => setTimeout(() => window.print(), 500));
     };
 
     if (kind === 'sale') {
       this.reportService.getSaleReport(this.fromDate, this.toDate).subscribe({ next: (d) => { this.saleRows.set(d); done(); }, error: () => this.loading.set(false) });
     } else if (kind === 'purchase') {
       this.reportService.getPurchaseReport(this.fromDate, this.toDate).subscribe({ next: (d) => { this.purchaseRows.set(d); done(); }, error: () => this.loading.set(false) });
+    } else if (kind === 'salereturn' || kind === 'purchasereturn') {
+      this.reportService.getReturnReport(kind === 'salereturn' ? 'sale' : 'purchase', this.fromDate, this.toDate)
+        .subscribe({ next: (d) => { this.returnRows.set(d); done(); }, error: () => this.loading.set(false) });
     } else if (kind === 'production') {
       this.reportService.getProductionReport(this.fromDate, this.toDate).subscribe({ next: (d) => { this.productionRows.set(d); done(); }, error: () => this.loading.set(false) });
     } else {
@@ -56,11 +64,16 @@ export class ReportPrintComponent implements OnInit {
 
   saleTotal(): number { return this.saleRows().reduce((s, r) => s + r.netAmount, 0); }
   purchaseTotal(): number { return this.purchaseRows().reduce((s, r) => s + r.netAmount, 0); }
+  saleReturnsTotal(): number { return this.saleRows().reduce((s, r) => s + (r.returnAmount || 0), 0); }
+  purchaseReturnsTotal(): number { return this.purchaseRows().reduce((s, r) => s + (r.returnAmount || 0), 0); }
+  returnTotal(field: 'netAmount' | 'refundAmount' | 'balanceAmount'): number { return this.returnRows().reduce((s, r) => s + r[field], 0); }
 
   title(): string {
     return {
       sale: 'Sale Report',
       purchase: 'Purchase Report',
+      salereturn: 'Sale Return Report',
+      purchasereturn: 'Purchase Return Report',
       production: 'Production / Pisai Report',
       stock: 'Stock Report'
     }[this.kind()];

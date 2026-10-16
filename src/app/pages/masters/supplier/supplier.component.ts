@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SupplierService } from '../../../core/services/master.service';
 import { Supplier } from '../../../core/models/master.model';
@@ -21,6 +22,13 @@ export class SupplierComponent implements OnInit {
   auth = inject(AuthService);
 
   suppliers = signal<Supplier[]>([]);
+  private route = inject(ActivatedRoute);
+  /** Quick filter; pre-filled from ?q= when opened from the header search. */
+  filter = signal('');
+  visible = computed(() => {
+    const q = this.filter().trim().toLowerCase();
+    return q ? this.suppliers().filter((x: any) => (x.code ?? '').toString().toLowerCase().includes(q) || (x.name ?? '').toString().toLowerCase().includes(q) || (x.phone ?? '').toString().toLowerCase().includes(q) || (x.city ?? '').toString().toLowerCase().includes(q)) : this.suppliers();
+  });
   loading = signal(true);
   showForm = signal(false);
   editingId = signal<number | null>(null);
@@ -35,7 +43,8 @@ export class SupplierComponent implements OnInit {
     openingBalance: [0]
   });
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((p) => this.filter.set(p.get('q') ?? '')); this.load(); }
 
   load(): void {
     this.loading.set(true);

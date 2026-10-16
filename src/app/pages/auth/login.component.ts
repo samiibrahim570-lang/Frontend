@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { TenantService } from '../../core/services/tenant.service';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private tenant = inject(TenantService);
 
   loading = false;
   showPassword = false;
@@ -35,10 +37,15 @@ export class LoginComponent {
     this.loading = true;
     this.authService.login(this.form.getRawValue() as any).subscribe({
       next: (res) => {
-        this.loading = false;
         if (res.success) {
-          this.toast.success(`Welcome back, ${res.data.fullName}`);
-          this.router.navigate(['/dashboard']);
+          // restore the user's last (or default) company/branch before the first screen loads
+          this.tenant.loadContext().subscribe(() => {
+            this.loading = false;
+            this.toast.success(`Welcome back, ${res.data.fullName}`);
+            this.router.navigate(['/dashboard']);
+          });
+        } else {
+          this.loading = false;
         }
       },
       error: () => {

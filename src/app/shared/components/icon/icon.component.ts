@@ -127,6 +127,28 @@ import { Component, Input } from '@angular/core';
         @case ('arrow-right') {
           <path d="M5 12h14M13 5l7 7-7 7"/>
         }
+        @case ('search') {
+          <circle cx="11" cy="11" r="6.5"/>
+          <path d="M20 20l-4.2-4.2"/>
+        }
+        @case ('company') {
+          <path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/>
+          <path d="M15 9h4a1 1 0 0 1 1 1v11"/>
+          <path d="M3 21h18M8 8h3M8 12h3M8 16h3"/>
+        }
+        @case ('branch') {
+          <path d="M4 10l1.5-5h13L20 10"/>
+          <path d="M4 10h16v1a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 11v-1z"/>
+          <path d="M5.5 13.5V20h13v-6.5M10 20v-4h4v4"/>
+        }
+        @case ('salereturn') {
+          <path d="M9 14l-5-5 5-5"/>
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
+        }
+        @case ('purchasereturn') {
+          <path d="M15 14l5-5-5-5"/>
+          <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>
+        }
         @default {
           <circle cx="12" cy="12" r="8"/>
         }

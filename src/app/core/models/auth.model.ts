@@ -24,6 +24,7 @@ export interface LoginResponse {
   fullName: string;
   userName: string;
   roleName: string;
+  isSuperAdmin: boolean;
   permissions: MenuPermission[];
 }
 
@@ -32,6 +33,7 @@ export interface CurrentUser {
   fullName: string;
   userName: string;
   roleName: string;
+  isSuperAdmin?: boolean;
   permissions: MenuPermission[];
 }
 
@@ -72,4 +74,12 @@ export interface AppUser {
   roleName: string;
   roleId: number;
   lastLoginAt: string | null;
+  access?: UserAccessRow[];
+}
+
+export interface UserAccessRow {
+  companyId: number;
+  companyName: string;
+  branchId: number;
+  branchName: string;
 }

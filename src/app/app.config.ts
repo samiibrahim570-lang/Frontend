@@ -6,11 +6,12 @@ import { routes } from './app.routes';
 import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { stockChangeInterceptor } from './core/interceptors/stock-change.interceptor';
+import { tenantInterceptor } from './core/interceptors/tenant.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, stockChangeInterceptor]))
+    provideHttpClient(withInterceptors([jwtInterceptor, tenantInterceptor, errorInterceptor, stockChangeInterceptor]))
   ]
 };

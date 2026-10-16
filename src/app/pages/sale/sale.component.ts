@@ -209,6 +209,11 @@ export class SaleComponent implements OnInit {
     window.open(url, '_blank');
   }
 
+  // Opens a new Sale Return with this invoice pre-selected
+  createReturn(s: SaleResponse): void {
+    this.router.navigate(['/sale-return'], { queryParams: { invoiceId: s.id } });
+  }
+
   // Opens a new Gate Pass with this invoice pre-selected
   createGatePass(s: SaleResponse): void {
     this.router.navigate(['/gate-pass'], { queryParams: { type: 'Sale', invoiceId: s.id } });

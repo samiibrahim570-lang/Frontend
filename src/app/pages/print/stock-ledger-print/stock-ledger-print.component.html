@@ -12,13 +12,7 @@
   @if (report(); as r) {
   <div class="print-page">
     <div class="print-header">
-      <div class="print-company">
-        <div class="mark">FF</div>
-        <div>
-          <h2>Fish Feed Mill</h2>
-          <p>Item Stock Movement Ledger</p>
-        </div>
-      </div>
+      <app-print-letterhead subtitle="Item Stock Movement Ledger"></app-print-letterhead>
       <div class="print-doc-title">
         <h1>STOCK LEDGER</h1>
         @if (fromDate || toDate) {

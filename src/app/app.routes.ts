@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { permissionGuard } from './core/guards/permission.guard';
+import { permissionGuard, superAdminGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/auth/login.component').then(m => m.LoginComponent) },
@@ -40,6 +40,18 @@ export const routes: Routes = [
     path: 'print/stock-ledger/:id',
     loadComponent: () => import('./pages/print/stock-ledger-print/stock-ledger-print.component').then(m => m.StockLedgerPrintComponent),
     canActivate: [authGuard]
+  },
+  {
+    path: 'print/sale-return/:id',
+    loadComponent: () => import('./pages/print/return-print/return-print.component').then(m => m.ReturnPrintComponent),
+    canActivate: [authGuard],
+    data: { kind: 'sale' }
+  },
+  {
+    path: 'print/purchase-return/:id',
+    loadComponent: () => import('./pages/print/return-print/return-print.component').then(m => m.ReturnPrintComponent),
+    canActivate: [authGuard],
+    data: { kind: 'purchase' }
   },
   {
     path: 'print/report/:type',
@@ -94,6 +106,18 @@ export const routes: Routes = [
         canActivate: [permissionGuard('PURCHASE')]
       },
       {
+        path: 'sale-return',
+        loadComponent: () => import('./pages/returns/return.component').then(m => m.ReturnComponent),
+        canActivate: [permissionGuard('SALERETURN')],
+        data: { kind: 'sale' }
+      },
+      {
+        path: 'purchase-return',
+        loadComponent: () => import('./pages/returns/return.component').then(m => m.ReturnComponent),
+        canActivate: [permissionGuard('PURCHASERETURN')],
+        data: { kind: 'purchase' }
+      },
+      {
         path: 'production',
         loadComponent: () => import('./pages/production/production.component').then(m => m.ProductionComponent),
         canActivate: [permissionGuard('PRODUCTION')]
@@ -126,7 +150,17 @@ export const routes: Routes = [
       {
         path: 'settings/users',
         loadComponent: () => import('./pages/settings/users/users.component').then(m => m.UsersComponent),
-        canActivate: [permissionGuard('USERS')]
+        canActivate: [superAdminGuard]
+      },
+      {
+        path: 'settings/companies',
+        loadComponent: () => import('./pages/settings/companies/companies.component').then(m => m.CompaniesComponent),
+        canActivate: [superAdminGuard]
+      },
+      {
+        path: 'settings/branches',
+        loadComponent: () => import('./pages/settings/branches/branches.component').then(m => m.BranchesComponent),
+        canActivate: [superAdminGuard]
       },
       {
         path: 'settings/roles',

@@ -204,6 +204,11 @@ export class PurchaseComponent implements OnInit {
   }
 
   // Opens a new Gate Pass with this invoice pre-selected
+  // Opens a new Purchase Return with this invoice pre-selected
+  createReturn(p: PurchaseResponse): void {
+    this.router.navigate(['/purchase-return'], { queryParams: { invoiceId: p.id } });
+  }
+
   createGatePass(p: PurchaseResponse): void {
     this.router.navigate(['/gate-pass'], { queryParams: { type: 'Purchase', invoiceId: p.id } });
   }

@@ -6,15 +6,18 @@ import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/common.model';
 import { VoucherResponse } from '../../../core/models/transactions.model';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { PrintLetterheadComponent } from '../../../shared/components/print-letterhead/print-letterhead.component';
+import { TenantService } from '../../../core/services/tenant.service';
 import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-voucher-print',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, PrintLetterheadComponent],
   templateUrl: './voucher-print.component.html'
 })
 export class VoucherPrintComponent implements OnInit {
+  private tenant = inject(TenantService);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
 
@@ -34,7 +37,7 @@ export class VoucherPrintComponent implements OnInit {
         next: (data) => {
           this.voucher.set(data);
           this.loading.set(false);
-          setTimeout(() => window.print(), 400);
+          this.tenant.letterhead().subscribe(() => setTimeout(() => window.print(), 500));
         },
         error: () => this.loading.set(false)
       });
