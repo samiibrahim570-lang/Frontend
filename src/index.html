@@ -1,25 +1,52 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Fish Feed Mill</title>
+
+  <title>BizFlow | Business Management System</title>
+
   <base href="/">
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f2238">
+
+  <meta name="application-name" content="BizFlow">
+  <meta name="description" content="BizFlow - Complete Business Management and ERP Software">
+
+  <!-- BizFlow Browser Favicon -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230f2238'/%3E%3Cpath d='M17 12h22a13 13 0 0 1 5 25 13 13 0 0 1-5 15H17V12zm11 9v12h10a6 6 0 0 0 0-12H28zm0 21v3h10a2 2 0 0 0 0-3H28z' fill='white'/%3E%3Ccircle cx='49' cy='49' r='7' fill='%2310b981'/%3E%3C/svg%3E">
+
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230f2238'/%3E%3Ctext x='32' y='45' font-size='43' font-weight='bold' text-anchor='middle' fill='white'%3EB%3C/text%3E%3Ccircle cx='50' cy='49' r='7' fill='%2310b981'/%3E%3C/svg%3E">
+
   <script>
-    // Apply the saved theme before Angular boots to avoid a flash of the default theme (see ThemeService).
+    // Apply saved theme before Angular boots
     (function () {
       try {
         var u = JSON.parse(localStorage.getItem('ffm_user') || 'null');
-        var p = (u && localStorage.getItem('ffm_theme_user_' + u.userId)) || localStorage.getItem('ffm_theme') || 'light';
-        if (p === 'system') p = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+        var p = (u && localStorage.getItem('ffm_theme_user_' + u.userId))
+          || localStorage.getItem('ffm_theme')
+          || 'light';
+
+        if (p === 'system') {
+          p = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+
         document.documentElement.setAttribute('data-theme', p);
-        document.documentElement.style.colorScheme = p === 'dark' ? 'dark' : 'light';
+
+        document.documentElement.style.colorScheme =
+          p === 'dark' ? 'dark' : 'light';
+
       } catch (e) {}
     })();
   </script>
-  <link rel="icon" type="image/x-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSm-T_CmfMAfKpPr2yP7yHdmfN04UCzJIWC7HhyzZ4dRxp2n_dr-o8TbCc&s=10">
 </head>
+
 <body>
   <app-root></app-root>
 </body>
