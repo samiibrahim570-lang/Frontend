@@ -6,7 +6,7 @@ export interface MenuGroupConfig {
 
 /**
  * Groups the flat permissions[] list (from login) into sections that mirror
- * how the mill actually works day to day:
+ * how a business actually works day to day:
  *   Overview -> Masters (setup once) -> Transactions (daily work) ->
  *   Accounts (money/stock tracking) -> Reports -> Administration
  */

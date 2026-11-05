@@ -10,6 +10,7 @@ import { NotificationBellComponent } from '../shared/components/notification-bel
 import { ThemeSwitcherComponent } from '../shared/components/theme-switcher/theme-switcher.component';
 import { GlobalSearchComponent } from '../shared/components/global-search/global-search.component';
 import { TenantService } from '../core/services/tenant.service';
+import { BRAND } from '../core/config/brand.config';
 
 interface DisplayGroup {
   label: string;
@@ -28,10 +29,11 @@ export class LayoutComponent implements OnInit {
   stock = inject(StockAlertService);
   tenant = inject(TenantService);
   private router = inject(Router);
+  readonly brand = BRAND;
 
   logoUrl = computed(() => this.tenant.logoUrl(this.tenant.currentCompany()?.logoPath));
   companyInitials = computed(() => {
-    const name = this.tenant.currentCompany()?.name ?? 'Fish Feed';
+    const name = this.tenant.currentCompany()?.name ?? BRAND.name;
     return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   });
 
@@ -85,6 +87,7 @@ export class LayoutComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+    this.tenant.clear();
     this.router.navigate(['/login']);
   }
 }

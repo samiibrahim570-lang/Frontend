@@ -1,124 +1,172 @@
 <div class="login-page">
-  <!-- Brand panel -->
-  <aside class="login-visual" aria-hidden="false">
-    <div class="visual-grid"></div>
-    <div class="visual-shape shape-1"></div>
-    <div class="visual-shape shape-2"></div>
+  <aside class="visual">
+    <div class="aurora a1"></div>
+    <div class="aurora a2"></div>
+    <div class="aurora a3"></div>
+    <div class="grid"></div>
 
     <div class="visual-content">
       <div class="brand">
-        <div class="brand-mark">FF</div>
-        <div class="brand-text">
-          <span class="brand-name">Fish Feed Mill</span>
-          <span class="brand-tag">Management Suite</span>
+        <div class="brand-mark">{{ brand.mark }}</div>
+        <div>
+          <div class="brand-name">{{ brand.name }}</div>
+          <div class="brand-tag">{{ brand.tagline }}</div>
         </div>
       </div>
 
-      <div class="visual-copy">
-        <h1>Run your entire mill<br />from one clear dashboard.</h1>
-        <p>Sale · Purchase · Production · Accounts — all in one place.</p>
+      <div class="headline">
+        <h1>Every company.<br />Every branch.<br /><span>One clear view.</span></h1>
+        <p>Sales, purchases, stock, production and accounts for your whole business, in one secure place.</p>
       </div>
 
-      <ul class="feature-list">
-        <li class="feature-item">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          </span>
-          <span>Sale &amp; Purchase invoicing with live stock</span>
-        </li>
-        <li class="feature-item">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          </span>
-          <span>Production / Pisai raw material tracking</span>
-        </li>
-        <li class="feature-item">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          </span>
-          <span>Customer &amp; Supplier ledgers, always up to date</span>
-        </li>
-        <li class="feature-item">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          </span>
-          <span>Role-based access for every team member</span>
-        </li>
-      </ul>
+      <!-- Decorative product preview -->
+      <div class="preview" aria-hidden="true">
+        <div class="pv-card pv-main">
+          <div class="pv-label">Sales this month</div>
+          <div class="pv-bars">
+            @for (h of [38, 56, 44, 72, 60, 88, 76, 100]; track $index) {
+              <i [style.height.%]="h" [style.animation-delay]="($index * 70) + 'ms'"></i>
+            }
+          </div>
+        </div>
+        <div class="pv-card pv-side">
+          <div class="pv-label">Cash flow</div>
+          <svg viewBox="0 0 120 44" fill="none"><path pathLength="1" d="M2 36 C 18 34, 24 18, 40 22 S 62 36, 78 18 S 104 10, 118 6" /></svg>
+        </div>
+        <div class="pv-card pv-donut">
+          <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" pathLength="100" /><circle class="seg" cx="18" cy="18" r="14" pathLength="100" /></svg>
+        </div>
+      </div>
 
-      <p class="visual-footer">Secure sign-in · Your data stays on your server</p>
+      <ul class="chips">
+        <li>Multi-company</li>
+        <li>Multi-branch</li>
+        <li>Role-based access</li>
+        <li>Separate data per company</li>
+      </ul>
     </div>
   </aside>
 
-  <!-- Form side -->
-  <main class="login-form-side">
-    <div class="login-card">
+  <main class="form-side">
+    <div class="card">
       <div class="mobile-brand">
-        <div class="brand-mark">FF</div>
-        <span class="brand-name">Fish Feed Mill</span>
+        <div class="brand-mark">{{ brand.mark }}</div>
+        <span>{{ brand.name }}</span>
       </div>
 
-      <header class="card-header">
-        <h2>Welcome back</h2>
-        <p class="subtitle">Sign in to continue to your dashboard.</p>
-      </header>
+      @if (step() === 'credentials') {
+        <header class="card-header">
+          <h2>Welcome back</h2>
+          <p>Sign in to your business account.</p>
+        </header>
 
-      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <div class="field">
-          <label for="userName">Username</label>
-          <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            <input
-              id="userName"
-              type="text"
-              formControlName="userName"
-              placeholder="Enter your username"
-              autocomplete="username"
-            />
+        @if (errorMessage(); as message) {
+          <div class="alert" role="alert">{{ message }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="field">
+            <label for="userName">Username</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              <input id="userName" type="text" formControlName="userName" placeholder="Enter your username" autocomplete="username" autofocus />
+            </div>
+            @if (form.controls.userName.touched && form.controls.userName.invalid) {
+              <small class="field-error">Username is required.</small>
+            }
           </div>
-        </div>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="input-wrap password-field">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            <input
-              [type]="showPassword ? 'text' : 'password'"
-              id="password"
-              formControlName="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-            <button
-              type="button"
-              class="toggle-visibility"
-              (click)="showPassword = !showPassword"
-              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-              [attr.aria-pressed]="showPassword"
-            >
-              @if (showPassword) {
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></svg>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <input class="has-toggle" [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password" placeholder="Enter your password" autocomplete="current-password" />
+              <button type="button" class="toggle" (click)="showPassword.set(!showPassword())"
+                      [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword()">
+                @if (showPassword()) {
+                  <svg viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></svg>
+                } @else {
+                  <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                }
+              </button>
+            </div>
+            @if (form.controls.password.touched && form.controls.password.invalid) {
+              <small class="field-error">Password is required.</small>
+            }
+          </div>
+
+          <button type="submit" class="submit" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner" aria-hidden="true"></span> Signing in…
+            } @else {
+              Sign in
+              <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            }
+          </button>
+        </form>
+
+        <p class="help">Forgot your password? Ask your company administrator to reset it.</p>
+      } @else {
+        <header class="card-header">
+          <h2>Choose where to work</h2>
+          <p>You can switch company or branch any time from the top bar.</p>
+        </header>
+
+        @if (errorMessage(); as message) {
+          <div class="alert" role="alert">{{ message }}</div>
+        }
+
+        @if (showCompanySearch()) {
+          <input class="company-search" type="search" placeholder="Search companies…" aria-label="Search companies"
+                 [value]="companySearch()" (input)="companySearch.set($any($event.target).value)" />
+        }
+
+        <div class="companies" role="radiogroup" aria-label="Company">
+          @for (c of visibleCompanies(); track c.id) {
+            <button type="button" class="company" role="radio" [attr.aria-checked]="c.id === companyId()"
+                    [class.active]="c.id === companyId()" (click)="chooseCompany(c)">
+              @if (logoUrl(c); as logo) {
+                <img [src]="logo" alt="" />
               } @else {
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="company-mark">{{ initials(c.name) }}</span>
               }
+              <span class="company-text">
+                <strong>{{ c.name }}</strong>
+                <small>{{ c.branches.length }} {{ c.branches.length === 1 ? 'branch' : 'branches' }}</small>
+              </span>
+              <span class="tick" aria-hidden="true"></span>
             </button>
-          </div>
+          } @empty {
+            <p class="help">No company matches your search.</p>
+          }
         </div>
 
-        <button type="submit" class="btn-submit" [disabled]="loading">
-          @if (loading) {
-            <span class="spinner" aria-hidden="true"></span>
-            <span>Signing in…</span>
+        @if (selectedCompany(); as company) {
+          @if (company.branches.length > 1) {
+            <div class="field branch-field">
+              <label>Branch</label>
+              <div class="branches" role="radiogroup" aria-label="Branch">
+                @for (b of company.branches; track b.id) {
+                  <button type="button" class="branch" role="radio" [attr.aria-checked]="b.id === branchId()"
+                          [class.active]="b.id === branchId()" (click)="branchId.set(b.id)">{{ b.name }}</button>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        <button type="button" class="submit" [disabled]="loading() || !companyId() || !branchId()" (click)="continueToWorkspace()">
+          @if (loading()) {
+            <span class="spinner" aria-hidden="true"></span> Opening…
           } @else {
-            <span>Sign In</span>
-            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            Continue
+            <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           }
         </button>
-      </form>
-
-      <p class="hint">Default: <strong>admin</strong> / <strong>Admin&#64;123</strong></p>
+        <button type="button" class="link-btn" (click)="useDifferentAccount()">Use a different account</button>
+      }
     </div>
 
-    <p class="footer">© Fish Feed Mill · All rights reserved</p>
+    <p class="footer">© {{ year }} {{ brand.name }}</p>
   </main>
 </div>

@@ -11,11 +11,14 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ExportService } from '../../core/services/export.service';
 import { StockAlertService } from '../../core/services/stock-alert.service';
+import { DateRange } from '../../core/utils/date.util';
+import { DateRangeFilterComponent } from '../../shared/components/date-range-filter/date-range-filter.component';
+import { PagerComponent } from '../../shared/components/pager/pager.component';
 
 @Component({
   selector: 'app-sale',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateRangeFilterComponent, PagerComponent],
   templateUrl: './sale.component.html'
 })
 export class SaleComponent implements OnInit {
@@ -36,6 +39,8 @@ export class SaleComponent implements OnInit {
   showForm = signal(false);
   saving = signal(false);
   viewing = signal<SaleResponse | null>(null);
+  /** Invoices ticked for a Gate Pass; kept while paging or filtering. */
+  selectedIds = signal<Set<number>>(new Set());
 
   customers = signal<Customer[]>([]);
   bookers = signal<Booker[]>([]);
@@ -214,9 +219,34 @@ export class SaleComponent implements OnInit {
     this.router.navigate(['/sale-return'], { queryParams: { invoiceId: s.id } });
   }
 
-  // Opens a new Gate Pass with this invoice pre-selected
+  // Opens a new Gate Pass holding only this invoice
   createGatePass(s: SaleResponse): void {
-    this.router.navigate(['/gate-pass'], { queryParams: { type: 'Sale', invoiceId: s.id } });
+    this.router.navigate(['/gate-pass'], { queryParams: { type: 'Sale', invoiceIds: s.id } });
+  }
+
+  toggleSelect(id: number): void {
+    this.selectedIds.update((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  // Opens a new Gate Pass holding only the invoices ticked in the list
+  createGatePassForSelected(): void {
+    this.router.navigate(['/gate-pass'], { queryParams: { type: 'Sale', invoiceIds: [...this.selectedIds()].join(',') } });
+  }
+
+  onRange(range: DateRange): void {
+    this.request.fromDate = range.from;
+    this.request.toDate = range.to;
+    this.request.pageNumber = 1;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    this.request.pageNumber = page;
+    this.load();
   }
 
   cancelSale(s: SaleResponse): void {

@@ -11,7 +11,7 @@ import { ThemeService } from './core/services/theme.service';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Fish Feed Mill';
+  title = 'BizFlow';
   // Instantiated at the root so the saved theme applies to every route (login, shell, print pages).
   private theme = inject(ThemeService);
 }

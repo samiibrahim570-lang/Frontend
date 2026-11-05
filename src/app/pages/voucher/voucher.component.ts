@@ -10,11 +10,14 @@ import { defaultPagedRequest, PagedRequest } from '../../core/models/common.mode
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ExportService } from '../../core/services/export.service';
+import { DateRange } from '../../core/utils/date.util';
+import { DateRangeFilterComponent } from '../../shared/components/date-range-filter/date-range-filter.component';
+import { PagerComponent } from '../../shared/components/pager/pager.component';
 
 @Component({
   selector: 'app-voucher',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateRangeFilterComponent, PagerComponent],
   templateUrl: './voucher.component.html'
 })
 export class VoucherComponent implements OnInit {
@@ -85,6 +88,18 @@ export class VoucherComponent implements OnInit {
   search(term: string): void {
     this.request.search = term || null;
     this.request.pageNumber = 1;
+    this.load();
+  }
+
+  onRange(range: DateRange): void {
+    this.request.fromDate = range.from;
+    this.request.toDate = range.to;
+    this.request.pageNumber = 1;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    this.request.pageNumber = page;
     this.load();
   }
 

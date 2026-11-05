@@ -12,6 +12,9 @@ import { ExportService } from '../../core/services/export.service';
 import { Observable } from 'rxjs';
 import { defaultPagedRequest, PagedRequest, PagedResult } from '../../core/models/common.model';
 import { RETURN_CONFIG, ReturnConfig, ReturnDoc, ReturnableInvoice, ReturnKind } from '../../core/models/return.model';
+import { DateRange } from '../../core/utils/date.util';
+import { DateRangeFilterComponent } from '../../shared/components/date-range-filter/date-range-filter.component';
+import { PagerComponent } from '../../shared/components/pager/pager.component';
 
 interface PartyOption { id: number; name: string; code: string; }
 interface InvoiceOption { id: number; invoiceNo: string; invoiceDate: string; netAmount: number; status: string; }
@@ -20,7 +23,7 @@ interface InvoiceOption { id: number; invoiceNo: string; invoiceDate: string; ne
 @Component({
   selector: 'app-return',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DateRangeFilterComponent, PagerComponent],
   templateUrl: './return.component.html'
 })
 export class ReturnComponent implements OnInit {
@@ -87,6 +90,18 @@ export class ReturnComponent implements OnInit {
   search(term: string): void {
     this.request.search = term || null;
     this.request.pageNumber = 1;
+    this.load();
+  }
+
+  onRange(range: DateRange): void {
+    this.request.fromDate = range.from;
+    this.request.toDate = range.to;
+    this.request.pageNumber = 1;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    this.request.pageNumber = page;
     this.load();
   }
 

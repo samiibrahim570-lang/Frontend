@@ -56,6 +56,16 @@ export class TenantService {
       });
   }
 
+  /** Select a workspace right after login, without a page reload. */
+  select(companyId: number, branchId: number): Observable<void> {
+    return this.http
+      .post<ApiResponse<{ companyId: number; branchId: number }>>(`${this.baseUrl}/switch`, { companyId, branchId })
+      .pipe(
+        tap((r) => this.setSelection(r.data.companyId, r.data.branchId)),
+        map(() => void 0)
+      );
+  }
+
   /** Cached per company/branch; used by every print page and Excel export header. */
   letterhead(): Observable<Letterhead | null> {
     const key = `${this.companyId()}-${this.branchId()}`;

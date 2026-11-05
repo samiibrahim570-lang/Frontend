@@ -130,6 +130,18 @@ export interface CreateGatePassRequest {
   confirm?: boolean;
   invoiceIds: number[];
 }
+export interface GatePassPickableInvoice {
+  id: number;
+  invoiceNo: string;
+  invoiceDate: string;
+  partyName: string;
+  driverName?: string | null;
+  vehicleNumber?: string | null;
+  bookerId?: number | null;
+  totalQuantity: number;
+  netAmount: number;
+  onGatePassNo?: string | null;
+}
 export interface GatePassItemDetail {
   itemId: number;
   itemName: string;
@@ -223,4 +235,53 @@ export interface DashboardSummary {
   totalSuppliers: number;
   totalItems: number;
   lowStockItemsCount: number;
+}
+
+// ---------------- DASHBOARD ANALYTICS ----------------
+export interface NamedAmount { name: string; amount: number; }
+export interface RankedAmount extends NamedAmount { previousAmount: number; invoices: number; }
+export interface DashboardKpis {
+  sales: number; previousSales: number;
+  purchases: number; previousPurchases: number;
+  saleReturns: number; purchaseReturns: number; netSales: number;
+  saleInvoices: number; previousSaleInvoices: number; averageInvoice: number;
+  cashIn: number; previousCashIn: number;
+  cashOut: number; previousCashOut: number; netCash: number;
+  receivable: number; payable: number;
+  stockValue: number; lowStockItems: number;
+  productionRaw: number; productionOutput: number; productionWastage: number;
+  customers: number; suppliers: number; activeItems: number;
+}
+export interface DashboardTrendPoint {
+  date: string; sales: number; purchases: number; cashIn: number; cashOut: number; stockIn: number; stockOut: number;
+}
+export interface DashboardItemSale {
+  itemId: number; itemName: string; categoryName: string; unitOfMeasure: string;
+  quantity: number; amount: number; returnedQuantity: number; previousAmount: number; currentStock: number;
+}
+export interface DashboardVoucher {
+  voucherNo: string; voucherDate: string; voucherType: string; paymentMode: string; partyName: string; amount: number;
+}
+export interface DashboardPartyBalance { partyId: number; name: string; periodDebit: number; periodCredit: number; balance: number; }
+export interface DashboardStockItem { itemName: string; unitOfMeasure: string; currentStock: number; reorderLevel: number; stockValue: number; }
+export interface DashboardAnalytics {
+  from: string; to: string; previousFrom: string; previousTo: string;
+  granularity: 'day' | 'month';
+  kpis: DashboardKpis;
+  trend: DashboardTrendPoint[];
+  items: DashboardItemSale[];
+  categories: NamedAmount[];
+  topCustomers: RankedAmount[];
+  topSuppliers: RankedAmount[];
+  topBookers: RankedAmount[];
+  cashInSources: NamedAmount[];
+  cashOutUses: NamedAmount[];
+  paymentModes: NamedAmount[];
+  recentVouchers: DashboardVoucher[];
+  customerLedger: { debit: number; credit: number };
+  supplierLedger: { debit: number; credit: number };
+  topReceivables: DashboardPartyBalance[];
+  topPayables: DashboardPartyBalance[];
+  lowStock: DashboardStockItem[];
+  topStockValue: DashboardStockItem[];
 }

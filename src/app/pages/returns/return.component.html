@@ -148,16 +148,19 @@
   </div>
 }
 
-<div class="page-header mt-20">
+<div class="filter-bar mt-20">
+  <app-date-range-filter (rangeChange)="onRange($event)"></app-date-range-filter>
   <input class="search-input" type="text" placeholder="Search return no / invoice no / {{ cfg.partyLabel.toLowerCase() }}…" (change)="search($any($event.target).value)" />
-  <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+  <div class="filter-actions">
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+  </div>
 </div>
 
 <div class="table-wrap">
   @if (loading()) {
     <p class="text-muted p-16">Loading…</p>
   } @else if (docs().length === 0) {
-    <div class="empty-state">No {{ cfg.title.toLowerCase() }}s yet.</div>
+    <div class="empty-state">No {{ cfg.title.toLowerCase() }}s for this filter.</div>
   } @else {
     <table>
       <thead>
@@ -188,3 +191,4 @@
     </table>
   }
 </div>
+<app-pager [page]="request.pageNumber" [pageSize]="request.pageSize" [total]="totalCount()" (pageChange)="goToPage($event)"></app-pager>

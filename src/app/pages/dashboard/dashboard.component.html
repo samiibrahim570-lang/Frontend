@@ -1,79 +1,322 @@
 <section class="hero">
-  <div class="hero-grid"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
   <div class="hero-content">
-    <p class="eyebrow">{{ todayDate() }}</p>
-    <h1>{{ greeting() }}, {{ auth.currentUser?.fullName }} 👋</h1>
-    <p class="hero-sub">Here's what's happening at the mill today.</p>
+    <p class="eyebrow">{{ tenant.currentCompany()?.name }}@if (tenant.currentBranch(); as b) { · {{ b.name }} }</p>
+    <h1>{{ greeting() }}, {{ auth.currentUser?.fullName }}</h1>
+    @if (data(); as d) {
+      <p class="hero-sub">Showing {{ d.from | date: 'dd MMM yyyy' }} to {{ d.to | date: 'dd MMM yyyy' }}, compared with {{ d.previousFrom | date: 'dd MMM' }} to {{ d.previousTo | date: 'dd MMM yyyy' }}.</p>
+    }
   </div>
-  <div class="hero-icon"><app-icon name="dashboard" [size]="32"></app-icon></div>
 </section>
 
-@if (loading()) {
-  <div class="stat-grid">
-    @for (n of [1, 2, 3, 4]; track n) { <div class="stat-card skeleton"></div> }
+<div class="toolbar">
+  <div class="tabs" role="tablist" aria-label="Dashboard sections">
+    @for (t of tabs; track t.id) {
+      <button type="button" role="tab" class="tab" [class.active]="tab() === t.id" [attr.aria-selected]="tab() === t.id" (click)="tab.set(t.id)">
+        <app-icon [name]="t.icon" [size]="16"></app-icon>{{ t.label }}
+      </button>
+    }
   </div>
-} @else {
-  @if (summary(); as s) {
-    <h2 class="section-title">Today at a glance</h2>
-    <div class="stat-grid">
-      <div class="stat-card accent-primary">
-        <div class="stat-icon"><app-icon name="sale" [size]="20"></app-icon></div>
-        <div class="stat-label">Today's Sales</div>
-        <div class="stat-value">{{ s.todaySales | number: '1.0-2' }}</div>
-      </div>
-      <div class="stat-card accent-accent">
-        <div class="stat-icon"><app-icon name="purchase" [size]="20"></app-icon></div>
-        <div class="stat-label">Today's Purchases</div>
-        <div class="stat-value">{{ s.todayPurchases | number: '1.0-2' }}</div>
-      </div>
-      <div class="stat-card accent-success">
-        <div class="stat-icon"><app-icon name="ledger" [size]="20"></app-icon></div>
-        <div class="stat-label">Total Receivable</div>
-        <div class="stat-value">{{ s.totalReceivable | number: '1.0-2' }}</div>
-      </div>
-      <div class="stat-card accent-danger">
-        <div class="stat-icon"><app-icon name="voucher" [size]="20"></app-icon></div>
-        <div class="stat-label">Total Payable</div>
-        <div class="stat-value">{{ s.totalPayable | number: '1.0-2' }}</div>
-      </div>
-    </div>
+  <app-date-range-filter [preset]="defaultPreset" [allowAll]="false" (rangeChange)="onRange($event)"></app-date-range-filter>
+</div>
 
-    <h2 class="section-title">Business overview</h2>
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-icon"><app-icon name="customer" [size]="20"></app-icon></div>
-        <div class="stat-label">Customers</div>
-        <div class="stat-value">{{ s.totalCustomers }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon"><app-icon name="supplier" [size]="20"></app-icon></div>
-        <div class="stat-label">Suppliers</div>
-        <div class="stat-value">{{ s.totalSuppliers }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon"><app-icon name="item" [size]="20"></app-icon></div>
-        <div class="stat-label">Items</div>
-        <div class="stat-value">{{ s.totalItems }}</div>
-      </div>
-      <div class="stat-card" [class.accent-danger]="lowStockCount(s) > 0">
-        <div class="stat-icon"><app-icon name="stockledger" [size]="20"></app-icon></div>
-        <div class="stat-label">Low Stock Items</div>
-        <div class="stat-value" [class.text-danger]="lowStockCount(s) > 0">{{ lowStockCount(s) }}</div>
-      </div>
-    </div>
-
-    <app-stock-alerts-card></app-stock-alerts-card>
-
-    <h2 class="section-title">Quick actions</h2>
-    <div class="quick-links">
-      <a routerLink="/sale" class="quick-link"><span class="ql-icon"><app-icon name="sale" [size]="18"></app-icon></span> New Sale</a>
-      <a routerLink="/purchase" class="quick-link"><span class="ql-icon"><app-icon name="purchase" [size]="18"></app-icon></span> New Purchase</a>
-      <a routerLink="/production" class="quick-link"><span class="ql-icon"><app-icon name="production" [size]="18"></app-icon></span> New Production</a>
-      <a routerLink="/gate-pass" class="quick-link"><span class="ql-icon"><app-icon name="gatepass" [size]="18"></app-icon></span> New Gate Pass</a>
-      <a routerLink="/reports" class="quick-link"><span class="ql-icon"><app-icon name="reports" [size]="18"></app-icon></span> View Reports</a>
-    </div>
-  } @else {
-    <!-- Summary failed to load: still show live stock alerts -->
-    <app-stock-alerts-card></app-stock-alerts-card>
-  }
+@if (failed() && !data()) {
+  <div class="empty-state">The dashboard could not be loaded. You may not have access to reports, or the server is unavailable.</div>
 }
+
+@if (!data() && loading()) {
+  <div class="kpis">
+    @for (n of [1, 2, 3, 4, 5, 6]; track n) { <div class="kpi skeleton"></div> }
+  </div>
+}
+
+@if (data(); as d) {
+  <div class="panels" [class.refreshing]="loading()">
+    @switch (tab()) {
+      @case ('overview') {
+        <div class="panel" role="tabpanel">
+          <div class="kpis">
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Sales', value: d.kpis.sales, previous: d.kpis.previousSales, icon: 'sale' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Purchases', value: d.kpis.purchases, previous: d.kpis.previousPurchases, icon: 'purchase', invert: true }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Cash in', value: d.kpis.cashIn, previous: d.kpis.previousCashIn, icon: 'voucher' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Cash out', value: d.kpis.cashOut, previous: d.kpis.previousCashOut, icon: 'voucher', invert: true }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Receivable (now)', value: d.kpis.receivable, icon: 'ledger' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Payable (now)', value: d.kpis.payable, icon: 'ledger' }"></ng-container>
+          </div>
+
+          <div class="grid two-one">
+            <section class="chart-card">
+              <h3>Sales vs purchases</h3>
+              <app-line-chart [labels]="labels()" [series]="salesSeries()" ariaLabel="Sales and purchases over the selected period"></app-line-chart>
+            </section>
+            <section class="chart-card">
+              <h3>Sales by category</h3>
+              <app-donut-chart [data]="d.categories" centerLabel="Item sales"></app-donut-chart>
+            </section>
+          </div>
+
+          <div class="grid even">
+            <section class="chart-card">
+              <div class="card-head">
+                <h3>Top selling items</h3>
+                <button type="button" class="link" (click)="tab.set('items')">See all items</button>
+              </div>
+              <app-rank-bars [data]="overviewItemRows()"></app-rank-bars>
+            </section>
+            <section class="chart-card">
+              <h3>Net cash by {{ d.granularity }}</h3>
+              <app-up-down-chart [labels]="labels()" [values]="netCash()" upLabel="More came in" downLabel="More went out"></app-up-down-chart>
+            </section>
+          </div>
+
+          <div class="quick-links">
+            @if (auth.canCreate('SALE')) { <a routerLink="/sale" class="quick-link"><app-icon name="sale" [size]="18"></app-icon>New Sale</a> }
+            @if (auth.canCreate('PURCHASE')) { <a routerLink="/purchase" class="quick-link"><app-icon name="purchase" [size]="18"></app-icon>New Purchase</a> }
+            @if (auth.canCreate('PRODUCTION')) { <a routerLink="/production" class="quick-link"><app-icon name="production" [size]="18"></app-icon>New Production</a> }
+            @if (auth.canCreate('GATEPASS')) { <a routerLink="/gate-pass" class="quick-link"><app-icon name="gatepass" [size]="18"></app-icon>New Gate Pass</a> }
+            @if (auth.canView('REPORTS')) { <a routerLink="/reports" class="quick-link"><app-icon name="reports" [size]="18"></app-icon>Reports</a> }
+          </div>
+        </div>
+      }
+
+      @case ('items') {
+        <div class="panel" role="tabpanel">
+          <div class="kpis">
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Net sales', value: d.kpis.netSales, icon: 'sale' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Sale returns', value: d.kpis.saleReturns, icon: 'sale' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Invoices', value: d.kpis.saleInvoices, previous: d.kpis.previousSaleInvoices, icon: 'sale' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Average invoice', value: d.kpis.averageInvoice, icon: 'sale' }"></ng-container>
+          </div>
+
+          <div class="grid two-one">
+            <section class="chart-card">
+              <div class="card-head">
+                <h3>Top {{ topItemRows().length }} items</h3>
+                <div class="segmented" role="group" aria-label="Rank items by">
+                  <button type="button" [class.active]="itemMetric() === 'amount'" [attr.aria-pressed]="itemMetric() === 'amount'" (click)="itemMetric.set('amount')">Amount</button>
+                  <button type="button" [class.active]="itemMetric() === 'quantity'" [attr.aria-pressed]="itemMetric() === 'quantity'" (click)="itemMetric.set('quantity')">Quantity</button>
+                </div>
+              </div>
+              <app-rank-bars [data]="topItemRows()" [showChange]="itemMetric() === 'amount'"></app-rank-bars>
+            </section>
+            <section class="chart-card">
+              <h3>Sales by category</h3>
+              <app-donut-chart [data]="d.categories" centerLabel="Item sales"></app-donut-chart>
+            </section>
+          </div>
+
+          <div class="grid even">
+            <section class="chart-card">
+              <h3>Top customers</h3>
+              <app-rank-bars [data]="ranked(d.topCustomers)"></app-rank-bars>
+            </section>
+            <section class="chart-card">
+              <h3>Top bookers</h3>
+              <app-rank-bars [data]="ranked(d.topBookers)"></app-rank-bars>
+            </section>
+          </div>
+
+          <section class="chart-card">
+            <div class="card-head">
+              <h3>Item sales detail <span class="text-muted">({{ filteredItems().length }})</span></h3>
+              <input class="search-input" type="search" placeholder="Search item or category…" aria-label="Search items"
+                     [value]="itemSearch()" (input)="itemSearch.set($any($event.target).value)" />
+            </div>
+            @if (filteredItems().length === 0) {
+              <div class="empty-state">No item sales for this filter.</div>
+            } @else {
+              <div class="table-wrap table-scroll">
+                <table class="num-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th><th>Category</th>
+                      <th class="text-right">Qty sold</th><th class="text-right">Returned</th>
+                      <th class="text-right">Amount</th><th class="text-right">Share</th>
+                      <th class="text-right">Vs previous</th><th class="text-right">In stock</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (i of filteredItems(); track i.itemId) {
+                      <tr>
+                        <td>{{ i.itemName }}</td>
+                        <td>{{ i.categoryName }}</td>
+                        <td class="text-right">{{ i.quantity | number: '1.0-2' }} {{ i.unitOfMeasure }}</td>
+                        <td class="text-right">{{ i.returnedQuantity | number: '1.0-2' }}</td>
+                        <td class="text-right">{{ i.amount | number: '1.0-2' }}</td>
+                        <td class="text-right">{{ share(i) | number: '1.0-1' }}%</td>
+                        <td class="text-right">
+                          @if (delta(i.amount, i.previousAmount); as c) {
+                            <span [class.good]="c.up" [class.bad]="!c.up">{{ c.up ? '▲' : '▼' }} {{ c.text }}</span>
+                          } @else { <span class="text-muted">New</span> }
+                        </td>
+                        <td class="text-right">{{ i.currentStock | number: '1.0-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </section>
+        </div>
+      }
+
+      @case ('money') {
+        <div class="panel" role="tabpanel">
+          <div class="kpis">
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Cash in', value: d.kpis.cashIn, previous: d.kpis.previousCashIn, icon: 'voucher' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Cash out', value: d.kpis.cashOut, previous: d.kpis.previousCashOut, icon: 'voucher', invert: true }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Net cash', value: d.kpis.netCash, icon: 'voucher' }"></ng-container>
+          </div>
+
+          <div class="grid even">
+            <section class="chart-card">
+              <h3>Cash in vs cash out</h3>
+              <app-line-chart [labels]="labels()" [series]="cashSeries()" ariaLabel="Cash in and cash out over the selected period"></app-line-chart>
+            </section>
+            <section class="chart-card">
+              <h3>Net cash by {{ d.granularity }}</h3>
+              <app-up-down-chart [labels]="labels()" [values]="netCash()" upLabel="More came in" downLabel="More went out" [height]="260"></app-up-down-chart>
+            </section>
+          </div>
+
+          <div class="grid thirds">
+            <section class="chart-card">
+              <h3>Where money came from</h3>
+              <app-donut-chart [data]="d.cashInSources" centerLabel="Cash in"></app-donut-chart>
+            </section>
+            <section class="chart-card">
+              <h3>Where money went</h3>
+              <app-donut-chart [data]="d.cashOutUses" centerLabel="Cash out"></app-donut-chart>
+            </section>
+            <section class="chart-card">
+              <h3>Voucher payment mode</h3>
+              <app-donut-chart [data]="d.paymentModes" centerLabel="Vouchers"></app-donut-chart>
+            </section>
+          </div>
+
+          <section class="chart-card">
+            <div class="card-head">
+              <h3>Latest vouchers</h3>
+              @if (auth.canView('VOUCHER')) { <a class="link" routerLink="/voucher">All vouchers</a> }
+            </div>
+            @if (d.recentVouchers.length === 0) {
+              <div class="empty-state">No vouchers in this period.</div>
+            } @else {
+              <div class="table-wrap">
+                <table class="num-table">
+                  <thead><tr><th>Voucher No</th><th>Date</th><th>Type</th><th>Party</th><th>Mode</th><th class="text-right">Amount</th></tr></thead>
+                  <tbody>
+                    @for (v of d.recentVouchers; track v.voucherNo) {
+                      <tr>
+                        <td>{{ v.voucherNo }}</td>
+                        <td>{{ v.voucherDate | date: 'dd-MMM-yyyy' }}</td>
+                        <td>{{ v.voucherType }}</td>
+                        <td>{{ v.partyName }}</td>
+                        <td>{{ v.paymentMode }}</td>
+                        <td class="text-right">{{ v.amount | number: '1.0-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </section>
+        </div>
+      }
+
+      @case ('ledger') {
+        <div class="panel" role="tabpanel">
+          <div class="kpis">
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Receivable (now)', value: d.kpis.receivable, icon: 'ledger' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Payable (now)', value: d.kpis.payable, icon: 'ledger' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Customer debit', value: d.customerLedger.debit, icon: 'customer' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Customer credit', value: d.customerLedger.credit, icon: 'customer' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Supplier debit', value: d.supplierLedger.debit, icon: 'supplier' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Supplier credit', value: d.supplierLedger.credit, icon: 'supplier' }"></ng-container>
+          </div>
+
+          <div class="grid even">
+            <ng-container *ngTemplateOutlet="parties; context: { title: 'Customers who owe the most', rows: d.topReceivables }"></ng-container>
+            <ng-container *ngTemplateOutlet="parties; context: { title: 'Suppliers owed the most', rows: d.topPayables }"></ng-container>
+          </div>
+
+          <section class="chart-card">
+            <h3>Top suppliers by purchases</h3>
+            <app-rank-bars [data]="ranked(d.topSuppliers)" color="var(--viz-2)"></app-rank-bars>
+          </section>
+        </div>
+      }
+
+      @case ('stock') {
+        <div class="panel" role="tabpanel">
+          <div class="kpis">
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Stock value (now)', value: d.kpis.stockValue, icon: 'stockledger' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Low stock items', value: d.kpis.lowStockItems, icon: 'stockledger' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Production output', value: d.kpis.productionOutput, icon: 'production' }"></ng-container>
+            <ng-container *ngTemplateOutlet="kpi; context: { label: 'Production wastage', value: d.kpis.productionWastage, icon: 'production' }"></ng-container>
+          </div>
+
+          <div class="grid even">
+            <section class="chart-card">
+              <h3>Stock in vs stock out</h3>
+              <p class="chart-note">Quantities are added across items, so mixed units (Kg, Bag) are combined.</p>
+              <app-line-chart [labels]="labels()" [series]="stockSeries()" ariaLabel="Stock in and stock out over the selected period"></app-line-chart>
+            </section>
+            <section class="chart-card">
+              <h3>Highest stock value</h3>
+              <app-rank-bars [data]="stockValueRows(d)" [showChange]="false"></app-rank-bars>
+            </section>
+          </div>
+
+          <app-stock-alerts-card></app-stock-alerts-card>
+        </div>
+      }
+    }
+  </div>
+}
+
+<ng-template #kpi let-label="label" let-value="value" let-previous="previous" let-icon="icon" let-invert="invert">
+  <div class="kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{{ label }}</span>
+      <span class="kpi-icon"><app-icon [name]="icon" [size]="16"></app-icon></span>
+    </div>
+    <div class="kpi-value" [appCountUp]="value"></div>
+    @if (previous !== undefined) {
+      @if (delta(value, previous); as c) {
+        <div class="kpi-delta" [class.good]="c.up !== !!invert" [class.bad]="c.up === !!invert">{{ c.up ? '▲' : '▼' }} {{ c.text }} <span>vs previous</span></div>
+      } @else {
+        <div class="kpi-delta"><span>No previous data</span></div>
+      }
+    }
+  </div>
+</ng-template>
+
+<ng-template #parties let-title="title" let-rows="rows">
+  <section class="chart-card">
+    <div class="card-head">
+      <h3>{{ title }}</h3>
+      @if (auth.canView('LEDGER')) { <a class="link" routerLink="/ledger">Open ledger</a> }
+    </div>
+    @if (rows.length === 0) {
+      <div class="empty-state">No outstanding balances.</div>
+    } @else {
+      <div class="table-wrap">
+        <table class="num-table">
+          <thead><tr><th>Name</th><th class="text-right">Debit (period)</th><th class="text-right">Credit (period)</th><th class="text-right">Balance (now)</th></tr></thead>
+          <tbody>
+            @for (r of rows; track r.partyId) {
+              <tr>
+                <td>{{ r.name }}</td>
+                <td class="text-right">{{ r.periodDebit | number: '1.0-2' }}</td>
+                <td class="text-right">{{ r.periodCredit | number: '1.0-2' }}</td>
+                <td class="text-right"><strong>{{ r.balance | number: '1.0-2' }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</ng-template>

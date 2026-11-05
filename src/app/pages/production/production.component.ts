@@ -11,11 +11,14 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ExportService } from '../../core/services/export.service';
 import { StockAlertService } from '../../core/services/stock-alert.service';
+import { DateRange } from '../../core/utils/date.util';
+import { DateRangeFilterComponent } from '../../shared/components/date-range-filter/date-range-filter.component';
+import { PagerComponent } from '../../shared/components/pager/pager.component';
 
 @Component({
   selector: 'app-production',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateRangeFilterComponent, PagerComponent],
   templateUrl: './production.component.html'
 })
 export class ProductionComponent implements OnInit {
@@ -29,6 +32,7 @@ export class ProductionComponent implements OnInit {
   stock = inject(StockAlertService);
 
   productions = signal<ProductionResponse[]>([]);
+  totalCount = signal(0);
   loading = signal(true);
   showForm = signal(false);
   saving = signal(false);
@@ -65,9 +69,21 @@ export class ProductionComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.productionService.getAll(this.request).subscribe({
-      next: (res) => { this.productions.set(res.items); this.loading.set(false); },
+      next: (res) => { this.productions.set(res.items); this.totalCount.set(res.totalCount); this.loading.set(false); },
       error: () => this.loading.set(false)
     });
+  }
+
+  onRange(range: DateRange): void {
+    this.request.fromDate = range.from;
+    this.request.toDate = range.to;
+    this.request.pageNumber = 1;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    this.request.pageNumber = page;
+    this.load();
   }
 
   newLineRow() {

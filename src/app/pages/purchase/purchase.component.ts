@@ -11,11 +11,14 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ExportService } from '../../core/services/export.service';
 import { StockAlertService } from '../../core/services/stock-alert.service';
+import { DateRange } from '../../core/utils/date.util';
+import { DateRangeFilterComponent } from '../../shared/components/date-range-filter/date-range-filter.component';
+import { PagerComponent } from '../../shared/components/pager/pager.component';
 
 @Component({
   selector: 'app-purchase',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DateRangeFilterComponent, PagerComponent],
   templateUrl: './purchase.component.html'
 })
 export class PurchaseComponent implements OnInit {
@@ -35,6 +38,8 @@ export class PurchaseComponent implements OnInit {
   showForm = signal(false);
   saving = signal(false);
   viewing = signal<PurchaseResponse | null>(null);
+  /** Invoices ticked for a Gate Pass; kept while paging or filtering. */
+  selectedIds = signal<Set<number>>(new Set());
 
   suppliers = signal<Supplier[]>([]);
   items = signal<Item[]>([]);
@@ -84,6 +89,31 @@ export class PurchaseComponent implements OnInit {
     this.request.search = term || null;
     this.request.pageNumber = 1;
     this.load();
+  }
+
+  onRange(range: DateRange): void {
+    this.request.fromDate = range.from;
+    this.request.toDate = range.to;
+    this.request.pageNumber = 1;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    this.request.pageNumber = page;
+    this.load();
+  }
+
+  toggleSelect(id: number): void {
+    this.selectedIds.update((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  // Opens a new Gate Pass holding only the invoices ticked in the list
+  createGatePassForSelected(): void {
+    this.router.navigate(['/gate-pass'], { queryParams: { type: 'Purchase', invoiceIds: [...this.selectedIds()].join(',') } });
   }
 
   newItemRow() {

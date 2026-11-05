@@ -257,7 +257,7 @@ export class ReportsComponent {
             { name: 'Customer Balances', data: r.customerBalances.map((b) => ({ Code: b.code, Name: b.name, Opening: b.openingBalance, Current: b.currentBalance })) },
             { name: 'Supplier Balances', data: r.supplierBalances.map((b) => ({ Code: b.code, Name: b.name, Opening: b.openingBalance, Current: b.currentBalance })) }
           ],
-          `FishFeedMill-Full-Export-${this.exportService.todayStamp()}`
+          `BizFlow-Full-Export-${this.exportService.todayStamp()}`
         );
         this.toast.success('Full application export downloaded.');
       },

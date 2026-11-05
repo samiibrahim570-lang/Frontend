@@ -55,7 +55,7 @@
           <p class="mb-0 text-sm mt-4">
             This dropdown will stay empty (and Save will fail) until at least one item has the
             <strong>"Finished Good"</strong> flag turned on. Go to <strong>Items</strong>, edit your output
-            product (e.g. processed Fish Feed), and tick "Finished Good".
+            product, and tick "Finished Good".
           </p>
         </div>
       }
@@ -135,15 +135,17 @@
   </div>
 }
 
-<div class="page-header mt-20">
-  <div></div>
-  <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+<div class="filter-bar mt-20">
+  <app-date-range-filter (rangeChange)="onRange($event)"></app-date-range-filter>
+  <div class="filter-actions">
+    <button class="btn btn-outline" (click)="exportExcel()">⬇ Export to Excel</button>
+  </div>
 </div>
 <div class="table-wrap">
   @if (loading()) {
     <p class="text-muted p-16">Loading…</p>
   } @else if (productions().length === 0) {
-    <div class="empty-state">No production records yet.</div>
+    <div class="empty-state">No production records for this filter.</div>
   } @else {
     <table>
       <thead><tr><th>Production No</th><th>Date</th><th class="text-right">Raw Qty</th><th class="text-right">Output Qty</th><th class="text-right">Wastage</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
@@ -171,3 +173,4 @@
     </table>
   }
 </div>
+<app-pager [page]="request.pageNumber" [pageSize]="request.pageSize" [total]="totalCount()" (pageChange)="goToPage($event)"></app-pager>

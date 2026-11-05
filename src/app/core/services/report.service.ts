@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/common.model';
 import {
+  DashboardAnalytics,
   DashboardSummary,
   ProductionReportItem,
   PurchaseReportItem,
@@ -55,6 +56,11 @@ export class ReportService {
     let params = new HttpParams();
     if (lowStockOnly) params = params.set('lowStockOnly', lowStockOnly);
     return this.http.get<ApiResponse<StockReportItem[]>>(`${this.baseUrl}/stock`, { params, context }).pipe(map((r) => r.data));
+  }
+
+  getDashboardAnalytics(from: string, to: string): Observable<DashboardAnalytics> {
+    const params = new HttpParams().set('from', from).set('to', to);
+    return this.http.get<ApiResponse<DashboardAnalytics>>(`${this.baseUrl}/dashboard-analytics`, { params }).pipe(map((r) => r.data));
   }
 
   getDashboard(): Observable<DashboardSummary> {

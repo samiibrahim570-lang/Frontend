@@ -58,43 +58,84 @@
         <input type="text" formControlName="remarks" />
       </div>
 
-      <h3 class="mt-20">Select Invoices <span class="text-muted">({{ selectedInvoiceIds.size }} selected)</span></h3>
-      <div class="table-wrap table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th class="w-36"></th>
-              <th>Invoice No</th>
-              <th>Date</th>
-              <th>Party</th>
-              <th class="text-right">Net Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (form.value.gatePassType === 'Sale') {
-              @for (s of availableSales(); track s.id) {
-                <tr class="cursor-pointer" (click)="toggleInvoice(s.id)" [class.row-selected]="isSelected(s.id)">
-                  <td><input type="checkbox" [checked]="isSelected(s.id)" (click)="$event.stopPropagation(); toggleInvoice(s.id)" /></td>
-                  <td>{{ s.invoiceNo }}</td>
-                  <td>{{ s.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
-                  <td>{{ s.customerName }}</td>
-                  <td class="text-right">{{ s.netAmount | number: '1.0-2' }}</td>
-                </tr>
-              }
-            } @else {
-              @for (p of availablePurchases(); track p.id) {
-                <tr class="cursor-pointer" (click)="toggleInvoice(p.id)" [class.row-selected]="isSelected(p.id)">
-                  <td><input type="checkbox" [checked]="isSelected(p.id)" (click)="$event.stopPropagation(); toggleInvoice(p.id)" /></td>
-                  <td>{{ p.invoiceNo }}</td>
-                  <td>{{ p.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
-                  <td>{{ p.supplierName }}</td>
-                  <td class="text-right">{{ p.netAmount | number: '1.0-2' }}</td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
+      <div class="flex justify-between items-center mt-20 mb-8">
+        <h3 class="m-0">On this Gate Pass <span class="text-muted">({{ selected().length }} selected)</span></h3>
+        @if (browsing()) {
+          <button type="button" class="btn btn-outline btn-sm" (click)="closeBrowse()">Done adding</button>
+        } @else {
+          <button type="button" class="btn btn-outline btn-sm" (click)="openBrowse()">+ Add more invoices</button>
+        }
       </div>
+
+      @if (selected().length === 0) {
+        <div class="empty-state">No invoice selected yet. Only the invoices you select here will appear on the Gate Pass.</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Invoice No</th><th>Date</th><th>Party</th><th class="text-right">Qty</th><th class="text-right">Net Amount</th><th class="w-50"></th></tr>
+            </thead>
+            <tbody>
+              @for (i of selected(); track i.id) {
+                <tr class="row-selected">
+                  <td>
+                    {{ i.invoiceNo }}
+                    @if (i.onGatePassNo) { <span class="badge badge-danger">Already on {{ i.onGatePassNo }}</span> }
+                  </td>
+                  <td>{{ i.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+                  <td>{{ i.partyName }}</td>
+                  <td class="text-right">{{ i.totalQuantity | number: '1.0-2' }}</td>
+                  <td class="text-right">{{ i.netAmount | number: '1.0-2' }}</td>
+                  <td class="text-right"><button type="button" class="btn btn-danger btn-sm" [attr.aria-label]="'Remove ' + i.invoiceNo" (click)="removeInvoice(i.id)">✕</button></td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3" class="text-right">Total</th>
+                <th class="text-right">{{ selectedQuantity() | number: '1.0-2' }}</th>
+                <th class="text-right">{{ selectedAmount() | number: '1.0-2' }}</th>
+                <th></th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+
+      @if (browsing()) {
+        <div class="card mt-12">
+          <div class="filter-bar">
+            <app-date-range-filter (rangeChange)="onBrowseRange($event)"></app-date-range-filter>
+            <input class="search-input" type="text" placeholder="Search invoice no / party…" (change)="onBrowseSearch($any($event.target).value)" />
+          </div>
+          <p class="text-muted mb-8">Invoices already on another Gate Pass are not listed.</p>
+          @if (browseLoading()) {
+            <p class="text-muted p-16">Loading…</p>
+          } @else if (browseResults().length === 0) {
+            <div class="empty-state">No invoices available for this filter.</div>
+          } @else {
+            <div class="table-wrap table-scroll">
+              <table>
+                <thead>
+                  <tr><th class="w-36"></th><th>Invoice No</th><th>Date</th><th>Party</th><th class="text-right">Qty</th><th class="text-right">Net Amount</th></tr>
+                </thead>
+                <tbody>
+                  @for (i of browseResults(); track i.id) {
+                    <tr class="cursor-pointer" (click)="toggleInvoice(i)" [class.row-selected]="isSelected(i.id)">
+                      <td><input type="checkbox" [attr.aria-label]="'Select ' + i.invoiceNo" [checked]="isSelected(i.id)" (click)="$event.stopPropagation(); toggleInvoice(i)" /></td>
+                      <td>{{ i.invoiceNo }}</td>
+                      <td>{{ i.invoiceDate | date: 'dd-MMM-yyyy' }}</td>
+                      <td>{{ i.partyName }}</td>
+                      <td class="text-right">{{ i.totalQuantity | number: '1.0-2' }}</td>
+                      <td class="text-right">{{ i.netAmount | number: '1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
 
       <div class="flex gap-8 mt-16">
         <button type="submit" class="btn btn-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save & Confirm' }}</button>
@@ -153,7 +194,7 @@
               <tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Rate</th><th class="text-right">Discount</th><th class="text-right">Total</th></tr>
             </thead>
             <tbody>
-              @for (it of inv.items; track it.itemId) {
+              @for (it of inv.items; track $index) {
                 <tr>
                   <td>{{ it.itemName }}</td>
                   <td class="text-right">{{ it.quantity | number: '1.0-2' }} {{ it.unitOfMeasure }}</td>
@@ -172,11 +213,15 @@
 }
 
 @if (!showForm() && !viewing()) {
-  <div class="table-wrap mt-16">
+  <div class="filter-bar mt-16">
+    <app-date-range-filter (rangeChange)="onListRange($event)"></app-date-range-filter>
+    <input class="search-input" type="text" placeholder="Search gate pass no / driver / vehicle…" (change)="search($any($event.target).value)" />
+  </div>
+  <div class="table-wrap">
     @if (loading()) {
       <p class="text-muted p-16">Loading…</p>
     } @else if (gatePasses().length === 0) {
-      <div class="empty-state">No gate passes yet.</div>
+      <div class="empty-state">No gate passes for this filter.</div>
     } @else {
       <table>
         <thead>
@@ -219,6 +264,7 @@
       </table>
     }
   </div>
+  <app-pager [page]="request.pageNumber" [pageSize]="request.pageSize" [total]="totalCount()" (pageChange)="goToPage($event)"></app-pager>
 }
 
 <ng-template #statusBadge let-status>

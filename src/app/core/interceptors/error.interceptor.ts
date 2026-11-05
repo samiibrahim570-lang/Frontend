@@ -14,6 +14,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
+      // The login page shows its own message: a wrong password is not an expired session
+      if (req.url.endsWith('/Auth/login')) {
+        return throwError(() => error);
+      }
       if (req.context.get(SILENT_ERRORS) && error.status !== 401) {
         return throwError(() => error);
       }

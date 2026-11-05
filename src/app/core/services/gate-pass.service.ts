@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../models/common.model';
-import { CreateGatePassRequest, GatePassResponse } from '../models/transactions.model';
+import { CreateGatePassRequest, GatePassPickableInvoice, GatePassResponse } from '../models/transactions.model';
 
 @Injectable({ providedIn: 'root' })
 export class GatePassService {
@@ -23,6 +23,21 @@ export class GatePassService {
 
     return this.http
       .get<ApiResponse<PagedResult<GatePassResponse>>>(this.baseUrl, { params })
+      .pipe(map((r) => r.data));
+  }
+
+  /** Invoice picker: exactly `ids` when given, otherwise invoices not yet on any active gate pass. */
+  getPickableInvoices(
+    type: 'Sale' | 'Purchase',
+    filter: { from?: string | null; to?: string | null; search?: string | null; ids?: number[] } = {}
+  ): Observable<GatePassPickableInvoice[]> {
+    let params = new HttpParams().set('type', type);
+    if (filter.from) params = params.set('from', filter.from);
+    if (filter.to) params = params.set('to', filter.to);
+    if (filter.search) params = params.set('search', filter.search);
+    (filter.ids ?? []).forEach((id) => (params = params.append('ids', id)));
+    return this.http
+      .get<ApiResponse<GatePassPickableInvoice[]>>(`${this.baseUrl}/invoices`, { params })
       .pipe(map((r) => r.data));
   }
 
