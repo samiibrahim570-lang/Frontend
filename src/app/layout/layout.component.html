@@ -41,6 +41,23 @@
           }
         </div>
       }
+
+      <!-- AI tools are not menu rows in the database; shown to every user (server checks permissions) -->
+      <div class="nav-group">
+        @if (sidebarOpen) {
+          <div class="nav-group-label">AI Tools</div>
+        }
+        <a routerLink="/assistant" routerLinkActive="active" class="nav-item" title="Business Assistant" (click)="closeMobile()">
+          <app-icon name="assistant" [size]="18"></app-icon>
+          @if (sidebarOpen) { <span>Business Assistant</span> }
+        </a>
+        @if (canImport()) {
+          <a routerLink="/import" routerLinkActive="active" class="nav-item" title="Import from Excel" (click)="closeMobile()">
+            <app-icon name="import" [size]="18"></app-icon>
+            @if (sidebarOpen) { <span>Import from Excel</span> }
+          </a>
+        }
+      </div>
     </nav>
 
     <div class="sidebar-footer">

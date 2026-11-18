@@ -1,0 +1,181 @@
+<div class="page-header">
+  <div>
+    <h1>Import from Excel</h1>
+    <p class="text-muted mb-0">Upload your old customer, supplier or item list. AI matches the columns, you check them, then import.</p>
+  </div>
+  @if (step() !== 'upload') {
+    <button class="btn btn-outline" (click)="reset()" [disabled]="busy()">Start over</button>
+  }
+</div>
+
+@if (entities.length === 0) {
+  <div class="card"><div class="empty-state">You don't have permission to create customers, suppliers or items.</div></div>
+} @else {
+  <!-- Step 1: upload -->
+  <div class="card">
+    <h3>1. Choose what to import and upload the file</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Import</label>
+        <select [ngModel]="entity()" (ngModelChange)="entity.set($event); step.set('upload'); result.set(null)" [disabled]="busy()">
+          @for (e of entities; track e.key) {
+            <option [value]="e.key">{{ e.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Excel / CSV file</label>
+        <input type="file" accept=".xlsx,.xls,.csv" (change)="onFile($event)" [disabled]="busy()" />
+      </div>
+      @if (sheetNames().length > 1) {
+        <div class="form-group">
+          <label>Sheet</label>
+          <select [ngModel]="sheetName()" (ngModelChange)="selectSheet($event); step.set('upload')" [disabled]="busy()">
+            @for (s of sheetNames(); track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    @if (fileName()) {
+      <p class="text-muted mb-0">
+        {{ fileName() }}: {{ headers().length }} columns, {{ dataRows().length }} rows.
+        Only the column names and first 5 rows are sent to AI.
+      </p>
+      @if (step() === 'upload') {
+        <div class="mt-12">
+          <button class="btn btn-primary" (click)="suggestMapping()" [disabled]="busy() || dataRows().length === 0">
+            {{ busy() ? 'Matching columns…' : 'Match columns' }}
+          </button>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Step 2: mapping -->
+  @if (step() !== 'upload' && step() !== 'done') {
+    <div class="card">
+      <h3>2. Check the column matching</h3>
+      @if (aiFailed()) {
+        <div class="notice warning">{{ aiFailed() }} Please match the columns yourself.</div>
+      }
+      @if (aiNotes()) {
+        <div class="notice info">{{ aiNotes() }}</div>
+      }
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Your column</th><th>Sample values</th><th>Goes into</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (m of mappings(); track $index; let i = $index) {
+              <tr>
+                <td><strong>{{ m.sourceColumn }}</strong></td>
+                <td class="text-muted sample">{{ sample(i) }}</td>
+                <td>
+                  <select [ngModel]="m.targetField ?? ''" (ngModelChange)="setMapping(i, $event)" [disabled]="busy()">
+                    <option value="">— skip —</option>
+                    @for (f of fields(); track f.field) {
+                      <option [value]="f.field">{{ f.label }}{{ f.required ? ' *' : '' }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  @if (m.targetField && m.confidence !== 'high') {
+                    <span class="badge badge-warning" title="AI was not sure. Please check.">check</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (missingRequired().length > 0) {
+        <div class="notice danger mt-12">
+          Required field not matched: {{ missingRequiredLabels() }}
+        </div>
+      }
+      @if (entity() === 'item') {
+        <label class="check mt-12">
+          <input type="checkbox" [(ngModel)]="createMissingCategories" (ngModelChange)="result.set(null)" />
+          Create categories that don't exist yet
+        </label>
+      }
+      <p class="text-muted mt-12 mb-0">Empty codes are filled automatically (C-0001, S-0001, I-0001…).</p>
+      <div class="mt-12">
+        <button class="btn btn-primary" (click)="validate()" [disabled]="busy() || missingRequired().length > 0">
+          {{ busy() && !result() ? 'Checking…' : 'Check ' + mappedRows().length + ' rows' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 3: review -->
+  @if (step() === 'review' && result(); as r) {
+    <div class="card">
+      <h3>3. Review and import</h3>
+      <div class="summary">
+        <span class="badge badge-success">{{ r.validRows }} ready</span>
+        @if (r.errors.length > 0) {
+          <span class="badge badge-danger">{{ r.totalRows - r.validRows }} rows with errors</span>
+        }
+        @if (r.newCategories.length > 0) {
+          <span class="text-muted">New categories: {{ r.newCategories.join(', ') }}</span>
+        }
+      </div>
+
+      @if (r.errors.length > 0) {
+        <div class="notice danger mt-12">
+          Nothing will be saved until every row is correct. Fix these rows in Excel and upload again, or change the matching above.
+        </div>
+      }
+
+      <div class="table-wrap mt-12 preview">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              @for (f of mappedFields(); track f.field) { <th>{{ f.label }}</th> }
+              <th>Problem</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of mappedRows(); track $index; let i = $index) {
+              @if (i < 200 || errorsByRow().has(i + 1)) {
+                <tr [class.row-error]="errorsByRow().has(i + 1)">
+                  <td>{{ i + 1 }}</td>
+                  @for (f of mappedFields(); track f.field) { <td>{{ row[f.field] }}</td> }
+                  <td class="err">{{ errorsByRow().get(i + 1)?.join(' ') }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (mappedRows().length > 200) {
+        <p class="text-muted mt-12 mb-0">Showing the first 200 rows and every row with an error.</p>
+      }
+
+      <div class="mt-12 flex gap-8">
+        <button class="btn btn-primary" (click)="importNow()" [disabled]="busy() || r.errors.length > 0">
+          {{ busy() ? 'Importing…' : 'Import ' + r.validRows + ' ' + entityLabel() }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Done -->
+  @if (step() === 'done' && result(); as r) {
+    <div class="card">
+      <h3>Done</h3>
+      <p class="mb-0">{{ r.imported }} {{ entityLabel() }} imported into this company and branch.</p>
+      @if (r.newCategories.length > 0) {
+        <p class="text-muted">New categories created: {{ r.newCategories.join(', ') }}</p>
+      }
+      <div class="mt-12"><button class="btn btn-primary" (click)="reset()">Import another file</button></div>
+    </div>
+  }
+}

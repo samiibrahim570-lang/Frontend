@@ -147,6 +147,15 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/reports/reports.component').then(m => m.ReportsComponent),
         canActivate: [permissionGuard('REPORTS')]
       },
+      // AI tools: no menu row needed. The assistant's tools and the import endpoints check permissions on the server.
+      {
+        path: 'assistant',
+        loadComponent: () => import('./pages/assistant/assistant.component').then(m => m.AssistantComponent)
+      },
+      {
+        path: 'import',
+        loadComponent: () => import('./pages/import/import.component').then(m => m.ImportComponent)
+      },
       {
         path: 'settings/users',
         loadComponent: () => import('./pages/settings/users/users.component').then(m => m.UsersComponent),

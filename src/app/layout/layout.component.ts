@@ -53,6 +53,10 @@ export class LayoutComponent implements OnInit {
     if (id && companyId && id !== this.tenant.branchId()) this.tenant.switchTo(companyId, id);
   }
 
+  canImport(): boolean {
+    return ['CUSTOMER', 'SUPPLIER', 'ITEM'].some((k) => this.authService.canCreate(k));
+  }
+
   sidebarOpen = true;
   mobileOpen = false;
 

@@ -1,0 +1,77 @@
+<div class="page-header">
+  <div>
+    <h1>
+      Business Assistant
+      @if (mode() === 'rules') {
+        <span class="mode-badge basic" title="Fixed questions only. No AI key is set on this server.">Basic mode</span>
+      } @else if (mode() === 'ai') {
+        <span class="mode-badge ai">AI</span>
+      }
+    </h1>
+    <p class="text-muted mb-0">
+      Ask about sales, purchases, stock and balances of {{ tenant.currentCompany()?.name || 'your company' }}.
+      It only reads data you are allowed to see.
+    </p>
+  </div>
+  @if (messages().length > 0) {
+    <button class="btn btn-outline" (click)="clear()" [disabled]="busy()">New chat</button>
+  }
+</div>
+
+<div class="card chat-card">
+  <div class="chat-scroll" #scroller>
+    @if (messages().length === 0) {
+      <div class="chat-empty">
+        @if (mode() === 'rules') {
+          <p class="text-muted">
+            Basic mode: neeche diye gaye sawal ya in jaise sawal poochein, jaise
+            <em>"pichle mahine ki sale"</em>, <em>"Ali Traders ka ledger"</em>, <em>"udhaar 60 din se purana"</em>.
+          </p>
+        } @else {
+          <p class="text-muted">Apna sawal likhein ya neeche se koi sawal chunein.</p>
+        }
+      </div>
+    }
+
+    @for (m of messages(); track $index) {
+      <div class="bubble-row" [class.me]="m.role === 'user'">
+        @if (m.role === 'user') {
+          <div class="bubble user">{{ m.text }}</div>
+        } @else {
+          <div class="bubble bot" [class.error]="m.error" [innerHTML]="m.html"></div>
+        }
+      </div>
+    }
+
+    @if (busy()) {
+      <div class="bubble-row">
+        <div class="bubble bot typing"><span></span><span></span><span></span></div>
+      </div>
+    }
+  </div>
+
+  <div class="quick">
+    @for (s of suggestions(); track s) {
+      <button class="suggestion" (click)="send(s)" [disabled]="busy()">{{ s }}</button>
+    }
+  </div>
+
+  <div class="chat-input">
+    <textarea
+      rows="2"
+      [(ngModel)]="input"
+      (keydown)="onKeydown($event)"
+      [disabled]="busy()"
+      placeholder="Apna sawal likhein… (Enter to send, Shift+Enter for new line)"
+      maxlength="4000"
+    ></textarea>
+    <button class="btn btn-primary" (click)="send()" [disabled]="busy() || !input.trim()">Send</button>
+  </div>
+  <p class="hint text-muted">
+    @if (mode() === 'rules') {
+      Basic mode sirf maloom sawal samajhta hai. Figures seedha aap ke reports se aati hain.
+    } @else {
+      AI can make mistakes. Check important figures in Reports before acting on them.
+    }
+  </p>
+</div>

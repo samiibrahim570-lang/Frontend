@@ -13,6 +13,16 @@ import { Component, Input } from '@angular/core';
           <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/>
           <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
         }
+        @case ('assistant') {
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5v-8z"/>
+          <path d="M12 6.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z"/>
+        }
+        @case ('import') {
+          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/>
+          <path d="M14 3v5h5"/>
+          <path d="M12 11v6"/>
+          <path d="M9.5 14.5 12 17l2.5-2.5"/>
+        }
         @case ('category') {
           <path d="M3 12 12 3l9 9-9 9-9-9z"/>
           <circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/>
