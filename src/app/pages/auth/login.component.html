@@ -1,172 +1,212 @@
 <div class="login-page">
-  <aside class="visual">
-    <div class="aurora a1"></div>
-    <div class="aurora a2"></div>
-    <div class="aurora a3"></div>
-    <div class="grid"></div>
-
-    <div class="visual-content">
-      <div class="brand">
-        <div class="brand-mark">{{ brand.mark }}</div>
-        <div>
-          <div class="brand-name">{{ brand.name }}</div>
-          <div class="brand-tag">{{ brand.tagline }}</div>
-        </div>
-      </div>
-
-      <div class="headline">
-        <h1>Every company.<br />Every branch.<br /><span>One clear view.</span></h1>
-        <p>Sales, purchases, stock, production and accounts for your whole business, in one secure place.</p>
-      </div>
-
-      <!-- Decorative product preview -->
-      <div class="preview" aria-hidden="true">
-        <div class="pv-card pv-main">
-          <div class="pv-label">Sales this month</div>
-          <div class="pv-bars">
-            @for (h of [38, 56, 44, 72, 60, 88, 76, 100]; track $index) {
-              <i [style.height.%]="h" [style.animation-delay]="($index * 70) + 'ms'"></i>
-            }
-          </div>
-        </div>
-        <div class="pv-card pv-side">
-          <div class="pv-label">Cash flow</div>
-          <svg viewBox="0 0 120 44" fill="none"><path pathLength="1" d="M2 36 C 18 34, 24 18, 40 22 S 62 36, 78 18 S 104 10, 118 6" /></svg>
-        </div>
-        <div class="pv-card pv-donut">
-          <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" pathLength="100" /><circle class="seg" cx="18" cy="18" r="14" pathLength="100" /></svg>
-        </div>
-      </div>
-
-      <ul class="chips">
-        <li>Multi-company</li>
-        <li>Multi-branch</li>
-        <li>Role-based access</li>
-        <li>Separate data per company</li>
-      </ul>
-    </div>
-  </aside>
-
-  <main class="form-side">
-    <div class="card">
-      <div class="mobile-brand">
+  <div class="shell">
+    <!-- ================= Left: form ================= -->
+    <main class="form-side">
+      <div class="logo">
         <div class="brand-mark">{{ brand.mark }}</div>
         <span>{{ brand.name }}</span>
       </div>
 
-      @if (step() === 'credentials') {
-        <header class="card-header">
-          <h2>Welcome back</h2>
-          <p>Sign in to your business account.</p>
-        </header>
+      <div class="form-wrap">
+        @if (step() === 'credentials') {
+          <header class="form-header">
+            <h1>Welcome Back</h1>
+            <p>Enter your username and password to access your account.</p>
+          </header>
 
-        @if (errorMessage(); as message) {
-          <div class="alert" role="alert">{{ message }}</div>
-        }
+          @if (errorMessage(); as message) {
+            <div class="alert" role="alert">{{ message }}</div>
+          }
 
-        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-          <div class="field">
-            <label for="userName">Username</label>
-            <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-              <input id="userName" type="text" formControlName="userName" placeholder="Enter your username" autocomplete="username" autofocus />
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="field">
+              <label for="userName">Username</label>
+              <input id="userName" type="text" formControlName="userName" [class.has-error]="attempted()" [attr.aria-invalid]="attempted() && form.controls.userName.invalid" [attr.aria-describedby]="attempted() && form.controls.userName.invalid ? 'userName-error' : null"
+                     placeholder="Enter your username" autocomplete="username" autofocus />
+              @if (attempted() && form.controls.userName.invalid) {
+                <small class="field-error" id="userName-error" role="alert">Enter your username.</small>
+              }
             </div>
-            @if (form.controls.userName.touched && form.controls.userName.invalid) {
-              <small class="field-error">Username is required.</small>
-            }
-          </div>
 
-          <div class="field">
-            <label for="password">Password</label>
-            <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-              <input class="has-toggle" [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password" placeholder="Enter your password" autocomplete="current-password" />
-              <button type="button" class="toggle" (click)="showPassword.set(!showPassword())"
-                      [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword()">
-                @if (showPassword()) {
-                  <svg viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></svg>
+            <div class="field">
+              <label for="password">Password</label>
+              <div class="password-wrap">
+                <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password"
+                       [class.has-error]="attempted()"
+                       [attr.aria-invalid]="attempted() && form.controls.password.invalid"
+                       [attr.aria-describedby]="attempted() && form.controls.password.invalid ? 'password-error' : null" placeholder="Enter your password" autocomplete="current-password" />
+                <button type="button" class="toggle" (click)="showPassword.set(!showPassword())"
+                        [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword()">
+                  @if (showPassword()) {
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
+              @if (attempted() && form.controls.password.invalid) {
+                <small class="field-error" id="password-error" role="alert">Enter your password.</small>
+              }
+            </div>
+
+            <div class="row-end">
+              <button type="button" class="text-link" (click)="showForgotHint.set(!showForgotHint())"
+                      [attr.aria-expanded]="showForgotHint()" aria-controls="forgot-hint">Forgot your password?</button>
+            </div>
+            @if (showForgotHint()) {
+              <p class="hint" id="forgot-hint">Your company administrator can reset it from Settings &rarr; Users.</p>
+            }
+
+            <button type="submit" class="submit" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner" aria-hidden="true"></span> Logging in…
+              } @else {
+                Log In
+              }
+            </button>
+          </form>
+        } @else {
+          <header class="form-header">
+            <h1>Choose where to work</h1>
+            <p>You can switch company or branch any time from the top bar.</p>
+          </header>
+
+          @if (errorMessage(); as message) {
+            <div class="alert" role="alert">{{ message }}</div>
+          }
+
+          @if (showCompanySearch()) {
+            <input class="company-search" type="search" placeholder="Search companies…" aria-label="Search companies"
+                   [value]="companySearch()" (input)="companySearch.set($any($event.target).value)" />
+          }
+
+          <div class="companies" role="radiogroup" aria-label="Company">
+            @for (c of visibleCompanies(); track c.id) {
+              <button type="button" class="company" role="radio" [attr.aria-checked]="c.id === companyId()"
+                      [class.active]="c.id === companyId()" (click)="chooseCompany(c)">
+                @if (logoUrl(c); as logo) {
+                  <img [src]="logo" alt="" />
                 } @else {
-                  <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span class="company-mark">{{ initials(c.name) }}</span>
                 }
+                <span class="company-text">
+                  <strong>{{ c.name }}</strong>
+                  <small>{{ c.branches.length }} {{ c.branches.length === 1 ? 'branch' : 'branches' }}</small>
+                </span>
+                <span class="tick" aria-hidden="true"></span>
               </button>
-            </div>
-            @if (form.controls.password.touched && form.controls.password.invalid) {
-              <small class="field-error">Password is required.</small>
+            } @empty {
+              <p class="hint">No company matches your search.</p>
             }
           </div>
 
-          <button type="submit" class="submit" [disabled]="loading()">
+          @if (selectedCompany(); as company) {
+            @if (company.branches.length > 1) {
+              <div class="field">
+                <span class="label">Branch</span>
+                <div class="branches" role="radiogroup" aria-label="Branch">
+                  @for (b of company.branches; track b.id) {
+                    <button type="button" class="branch" role="radio" [attr.aria-checked]="b.id === branchId()"
+                            [class.active]="b.id === branchId()" (click)="branchId.set(b.id)">{{ b.name }}</button>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <button type="button" class="submit" [disabled]="loading() || !companyId() || !branchId()" (click)="continueToWorkspace()">
             @if (loading()) {
-              <span class="spinner" aria-hidden="true"></span> Signing in…
+              <span class="spinner" aria-hidden="true"></span> Opening…
             } @else {
-              Sign in
-              <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              Continue
             }
           </button>
-        </form>
-
-        <p class="help">Forgot your password? Ask your company administrator to reset it.</p>
-      } @else {
-        <header class="card-header">
-          <h2>Choose where to work</h2>
-          <p>You can switch company or branch any time from the top bar.</p>
-        </header>
-
-        @if (errorMessage(); as message) {
-          <div class="alert" role="alert">{{ message }}</div>
+          <button type="button" class="link-btn" (click)="useDifferentAccount()">Use a different account</button>
         }
+      </div>
 
-        @if (showCompanySearch()) {
-          <input class="company-search" type="search" placeholder="Search companies…" aria-label="Search companies"
-                 [value]="companySearch()" (input)="companySearch.set($any($event.target).value)" />
-        }
-
-        <div class="companies" role="radiogroup" aria-label="Company">
-          @for (c of visibleCompanies(); track c.id) {
-            <button type="button" class="company" role="radio" [attr.aria-checked]="c.id === companyId()"
-                    [class.active]="c.id === companyId()" (click)="chooseCompany(c)">
-              @if (logoUrl(c); as logo) {
-                <img [src]="logo" alt="" />
-              } @else {
-                <span class="company-mark">{{ initials(c.name) }}</span>
-              }
-              <span class="company-text">
-                <strong>{{ c.name }}</strong>
-                <small>{{ c.branches.length }} {{ c.branches.length === 1 ? 'branch' : 'branches' }}</small>
-              </span>
-              <span class="tick" aria-hidden="true"></span>
-            </button>
-          } @empty {
-            <p class="help">No company matches your search.</p>
+      <footer class="footer">
+        <span>Copyright © {{ year }} {{ brand.name }}</span>
+        <div class="themes" role="radiogroup" aria-label="Theme">
+          @for (t of themeOptions; track t.id) {
+            <button type="button" class="theme-dot" role="radio" [title]="t.label" [attr.aria-label]="t.label + ' theme'"
+                    [attr.aria-checked]="theme.preference() === t.id" [class.selected]="theme.preference() === t.id"
+                    [style.background]="'linear-gradient(135deg, ' + t.swatch[1] + ' 50%, ' + t.swatch[2] + ' 50%)'"
+                    (click)="theme.setTheme(t.id)"></button>
           }
         </div>
+      </footer>
+    </main>
 
-        @if (selectedCompany(); as company) {
-          @if (company.branches.length > 1) {
-            <div class="field branch-field">
-              <label>Branch</label>
-              <div class="branches" role="radiogroup" aria-label="Branch">
-                @for (b of company.branches; track b.id) {
-                  <button type="button" class="branch" role="radio" [attr.aria-checked]="b.id === branchId()"
-                          [class.active]="b.id === branchId()" (click)="branchId.set(b.id)">{{ b.name }}</button>
-                }
+    <!-- ================= Right: theme-coloured showcase ================= -->
+    <aside class="showcase" aria-hidden="true">
+      <div class="showcase-text">
+        <h2>Effortlessly manage your sales, stock and accounts.</h2>
+        <p>Log in to open your dashboard and run every company and branch from one place.</p>
+      </div>
+
+      <div class="mock">
+        <!-- Main dashboard window -->
+        <div class="win">
+          <div class="win-bar"><i></i><i></i><i></i></div>
+          <div class="win-body">
+            <div class="m-stats">
+              <div class="m-stat m-stat-hi">
+                <span>Sales this month</span>
+                <b>Rs 3,48,200</b>
+                <em>+12.4%</em>
+              </div>
+              <div class="m-stat">
+                <span>Purchases</span>
+                <b>Rs 1,92,750</b>
+                <em class="down">-3.1%</em>
+              </div>
+              <div class="m-stat">
+                <span>Receivables</span>
+                <b>Rs 86,400</b>
+                <em>14 parties</em>
               </div>
             </div>
-          }
-        }
 
-        <button type="button" class="submit" [disabled]="loading() || !companyId() || !branchId()" (click)="continueToWorkspace()">
-          @if (loading()) {
-            <span class="spinner" aria-hidden="true"></span> Opening…
-          } @else {
-            Continue
-            <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          }
-        </button>
-        <button type="button" class="link-btn" (click)="useDifferentAccount()">Use a different account</button>
-      }
-    </div>
+            <div class="m-chart">
+              <div class="m-head"><span>Sales vs Purchase</span><small>Last 8 weeks</small></div>
+              <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="mockFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="currentColor" stop-opacity=".28" />
+                    <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <path class="area" d="M0 70 C 25 62, 40 48, 65 52 S 105 30, 130 36 S 175 22, 200 28 S 250 10, 300 14 L 300 90 L 0 90 Z" />
+                <path class="line" d="M0 70 C 25 62, 40 48, 65 52 S 105 30, 130 36 S 175 22, 200 28 S 250 10, 300 14" />
+                <path class="line2" d="M0 78 C 30 74, 50 66, 80 68 S 130 56, 160 60 S 220 48, 300 50" />
+              </svg>
+            </div>
 
-    <p class="footer">© {{ year }} {{ brand.name }}</p>
-  </main>
+            <div class="m-table">
+              <div class="m-head"><span>Recent invoices</span></div>
+              <div class="m-row"><span>INV-1042</span><span>Al-Madina Traders</span><span>Rs 48,500</span><span class="tag ok">Paid</span></div>
+              <div class="m-row"><span>INV-1041</span><span>Green Valley Farms</span><span>Rs 1,12,000</span><span class="tag due">Due</span></div>
+              <div class="m-row"><span>INV-1040</span><span>Indus Feeds</span><span>Rs 26,300</span><span class="tag ok">Paid</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating cards -->
+        <div class="float f-donut">
+          <div class="m-head"><span>Stock in hand</span></div>
+          <div class="donut">
+            <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" pathLength="100" /><circle class="seg" cx="18" cy="18" r="14" pathLength="100" /></svg>
+            <div><b>1,284</b><small>bags</small></div>
+          </div>
+        </div>
+        <div class="float f-bars">
+          <div class="m-head"><span>Production</span></div>
+          <div class="bars">
+            @for (h of [45, 70, 55, 90, 65, 80]; track $index) { <i [style.height.%]="h"></i> }
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>

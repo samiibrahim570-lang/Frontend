@@ -8,6 +8,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { TenantService } from '../../core/services/tenant.service';
 import { AccessibleCompany } from '../../core/models/tenant.model';
 import { BRAND } from '../../core/config/brand.config';
+import { ThemeService } from '../../core/services/theme.service';
 
 const SEARCHABLE_COMPANY_COUNT = 6;
 
@@ -24,6 +25,10 @@ export class LoginComponent {
   private router = inject(Router);
   private toast = inject(ToastService);
   tenant = inject(TenantService);
+  theme = inject(ThemeService);
+
+  /** 'System' is left out here - the dots show the actual colour themes. */
+  readonly themeOptions = this.theme.options.filter((t) => t.id !== 'system');
 
   readonly brand = BRAND;
   readonly year = new Date().getFullYear();
@@ -32,6 +37,9 @@ export class LoginComponent {
   loading = signal(false);
   errorMessage = signal<string | null>(null);
   showPassword = signal(false);
+  /** Field errors show only after the first submit, not when focus simply leaves a field. */
+  attempted = signal(false);
+  showForgotHint = signal(false);
 
   // Workspace step
   companyId = signal<number | null>(null);
@@ -54,6 +62,7 @@ export class LoginComponent {
   submit(): void {
     if (this.loading()) return;
     this.errorMessage.set(null);
+    this.attempted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -117,6 +126,10 @@ export class LoginComponent {
     this.authService.logout();
     this.tenant.clear();
     this.form.reset();
+    this.attempted.set(false);
+    this.showPassword.set(false);
+    this.showForgotHint.set(false);
+    this.companySearch.set('');
     this.errorMessage.set(null);
     this.step.set('credentials');
   }
